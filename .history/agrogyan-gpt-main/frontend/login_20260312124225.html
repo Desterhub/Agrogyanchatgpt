@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login - AgroGyanGPT</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="login-wrapper">
+
+  <div class="login-card">
+
+      <h1 class="login-brand">🌱 AgroGyanGPT</h1>
+      <p class="login-subtitle">Secure Access Portal</p>
+
+      <label class="visually-hidden" for="email">Email address</label>
+      <input id="email" type="email" placeholder="Email Address" autocomplete="email" />
+
+      <label class="visually-hidden" for="password">Password</label>
+      <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
+
+      <button id="loginButton" class="login-btn-green" onclick="login()" type="button">
+          <span class="btn-text">Login</span>
+          <span class="btn-spinner hidden" aria-hidden="true"></span>
+      </button>
+
+      <p class="login-switch">
+          Not registered? 
+          <a href="#" class="register-link" onclick="showRegisterModal(); return false;">Register here</a>
+      </p>
+
+      <p id="authMessage" role="alert" aria-live="polite"></p>
+
+  </div>
+
+</div>
+
+<!-- Registration modal -->
+<div id="registerModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <h2>Create an account</h2>
+        <input id="regName" type="text" placeholder="Full name" />
+        <input id="regEmail" type="email" placeholder="Email address" />
+        <input id="regPassword" type="password" placeholder="Password (min 6 chars)" />
+        <button id="registerButton" class="login-btn-green" onclick="registerUser()" type="button">
+            <span class="btn-text">Register</span>
+            <span class="btn-spinner hidden" aria-hidden="true"></span>
+        </button>
+        <p style="margin-top: 12px; font-size: 14px;">
+            Already have an account? <a href="#" class="register-link" onclick="hideRegisterModal(); return false;">Back to login</a>
+        </p>
+        <p id="registerMessage" role="alert" aria-live="polite" style="margin-top: 8px; font-size: 14px;"></p>
+    </div>
+</div>
+
+<script src="auth.js"></script>
+</body>
+</html>

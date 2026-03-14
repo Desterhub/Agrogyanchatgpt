@@ -1,0 +1,375 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Farmer Community</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Community page tweaks (extends base styles in style.css) */
+        .community-container {
+            max-width: 860px;
+            margin: 26px auto 64px;
+            padding: 0 16px;
+        }
+
+        .post-box {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .post-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+        }
+
+        .post-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 18px;
+            border-radius: 18px;
+            margin-bottom: 18px;
+            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(47, 122, 62, 0.12);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+            opacity: 0;
+            animation: fadeInUp 0.34s forwards;
+        }
+
+        .post-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.15);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .post-meta {
+            font-size: 13px;
+            color: #536e55;
+            white-space: nowrap;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .post-actions button {
+            background: rgba(47, 122, 62, 0.1);
+            border: 1px solid rgba(47, 122, 62, 0.25);
+            color: #2f7a3e;
+            padding: 8px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .post-actions button:hover {
+            background: rgba(47, 122, 62, 0.18);
+            transform: translateY(-1px);
+        }
+
+        .comment {
+            background: rgba(47, 122, 62, 0.08);
+            border: 1px solid rgba(47, 122, 62, 0.12);
+            padding: 10px 12px;
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+
+        /* loading skeleton */
+        .skeleton {
+            position: relative;
+            overflow: hidden;
+            opacity: 0.9;
+        }
+
+        .skeleton::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -120%;
+            width: 120%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            animation: shimmer 1.3s infinite;
+        }
+
+        .skeleton-line {
+            background: rgba(230, 230, 230, 0.9);
+            border-radius: 10px;
+            height: 14px;
+            margin-bottom: 10px;
+        }
+
+        .skeleton-title {
+            width: 60%;
+            height: 18px;
+        }
+
+        .skeleton-meta {
+            width: 35%;
+            height: 12px;
+        }
+
+        .skeleton-text {
+            width: 100%;
+        }
+
+        .skeleton-action {
+            width: 52%;
+            height: 32px;
+        }
+
+        @keyframes shimmer {
+            from {
+                transform: translateX(-120%);
+            }
+            to {
+                transform: translateX(120%);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .top-bar {
+                flex-wrap: wrap;
+                gap: 10px;
+                justify-content: center;
+            }
+
+            .top-actions {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .community-container {
+                padding: 0 14px;
+            }
+
+            .post-card {
+                padding: 14px;
+            }
+
+            .post-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .post-actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="top-bar">
+    <div class="brand-left">
+        🌾 Farmer Community
+        <div id="welcomeUser" class="welcome-text"></div>
+    </div>
+
+    <div class="top-actions">
+        <button class="nav-btn" onclick="goHome()">Home</button>
+        <button id="authButton" class="nav-btn"></button>
+    </div>
+</header>
+
+<main class="community-container">
+    <section class="post-box">
+        <textarea id="postContent" placeholder="Ask something to the community..."></textarea>
+        <button class="primary-btn" onclick="createPost()">Post</button>
+    </section>
+
+    <div id="postsContainer"></div>
+</main>
+
+<script>
+const API = "http://127.0.0.1:8000";
+
+function getStoredReactions(postId) {
+    try {
+        const raw = localStorage.getItem(`reactions_${postId}`);
+        return raw ? JSON.parse(raw) : {};
+    } catch {
+        return {};
+    }
+}
+
+function setStoredReactions(postId, reactions) {
+    localStorage.setItem(`reactions_${postId}`, JSON.stringify(reactions));
+}
+
+function getReactionCount(postId, emoji) {
+    const reactions = getStoredReactions(postId);
+    return reactions[emoji] || 0;
+}
+
+function addReaction(postId, emoji) {
+    const reactions = getStoredReactions(postId);
+    reactions[emoji] = (reactions[emoji] || 0) + 1;
+    setStoredReactions(postId, reactions);
+    loadPosts();
+}
+
+function showLoadingSkeleton(count = 3) {
+    const container = document.getElementById("postsContainer");
+    container.innerHTML = "";
+
+    for (let i = 0; i < count; i++) {
+        const card = document.createElement("div");
+        card.className = "post-card skeleton";
+        card.innerHTML = `
+            <div class="skeleton-line skeleton-title"></div>
+            <div class="skeleton-line skeleton-meta"></div>
+            <div class="skeleton-line skeleton-text"></div>
+            <div class="skeleton-line skeleton-text"></div>
+            <div class="skeleton-line skeleton-action"></div>
+        `;
+        container.appendChild(card);
+    }
+}
+
+function scrollToLatestPost() {
+    const container = document.getElementById("postsContainer");
+    const last = container.lastElementChild;
+    if (last) {
+        last.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+}
+
+async function createPost() {
+    const content = document.getElementById("postContent").value.trim();
+    if (!content) {
+        alert("Write something first");
+        return;
+    }
+
+    await fetch(API + "/community/create-post", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, user_id: 1 })
+    });
+
+    document.getElementById("postContent").value = "";
+    await loadPosts();
+    scrollToLatestPost();
+}
+
+async function loadPosts() {
+    showLoadingSkeleton();
+
+    const res = await fetch(API + "/community/posts");
+    const posts = await res.json();
+
+    const container = document.getElementById("postsContainer");
+    container.innerHTML = "";
+
+    for (const post of posts) {
+        const commentRes = await fetch(API + "/community/comments/" + post.id);
+        const comments = await commentRes.json();
+
+        const postDiv = document.createElement("div");
+        postDiv.className = "post-card";
+
+        const reactionButtons = ["❤️", "😂", "😮", "😢", "😡"].map((emoji) => {
+            return `<button onclick="addReaction(${post.id}, '${emoji}')">${emoji} ${getReactionCount(post.id, emoji)}</button>`;
+        }).join("");
+
+        postDiv.innerHTML = `
+            <div class="post-header">
+                <div class="post-content">${post.content}</div>
+                <div class="post-meta">${new Date(post.timestamp).toLocaleString()}</div>
+            </div>
+
+            <div class="post-actions">
+                <button onclick="likePost(${post.id})">👍 ${post.likes || 0}</button>
+                <button onclick="dislikePost(${post.id})">👎 ${post.dislikes || 0}</button>
+                ${reactionButtons}
+            </div>
+
+            <div class="comment" style="margin-top: 14px;">
+                <input type="text" id="comment-${post.id}" placeholder="Write reply" />
+                <button class="primary-btn" style="margin-top: 10px;" onclick="addComment(${post.id})">Reply</button>
+            </div>
+
+            <div id="comments-${post.id}">
+                ${comments.map(c => `<div class="comment">${c.text}</div>`).join("")}
+            </div>
+        `;
+
+        container.appendChild(postDiv);
+    }
+}
+
+async function likePost(id) {
+    await fetch(API + "/community/like/" + id, { method: "POST" });
+    loadPosts();
+}
+
+async function dislikePost(id) {
+    await fetch(API + "/community/dislike/" + id, { method: "POST" });
+    loadPosts();
+}
+
+async function addComment(id) {
+    const text = document.getElementById("comment-" + id).value.trim();
+    if (!text) return;
+
+    await fetch(API + "/community/comment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ post_id: id, text })
+    });
+
+    loadPosts();
+    scrollToLatestPost();
+}
+
+function updateAuthButtons() {
+    const user = localStorage.getItem("user");
+    const authButton = document.getElementById("authButton");
+    const welcomeUser = document.getElementById("welcomeUser");
+
+    if (user) {
+        welcomeUser.innerText = "Hi " + user;
+        authButton.innerText = "Logout";
+        authButton.onclick = () => {
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
+        };
+    } else {
+        welcomeUser.innerText = "";
+        authButton.innerText = "Login";
+        authButton.onclick = () => {
+            window.location.href = "login.html";
+        };
+    }
+}
+
+function goHome() {
+    window.location.href = "index.html";
+}
+
+updateAuthButtons();
+loadPosts();
+</script>
+
+</body>
+</html>

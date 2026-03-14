@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile - AgroGyanGPT</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="top-bar">
+    <div class="brand-left" data-i18n="appName">🌱 AgroGyanGPT</div>
+    <div id="welcomeUser" class="welcome-text"></div>
+
+    <div class="top-actions">
+        <select id="uiLanguage" class="lang-select" aria-label="UI Language">
+            <option value="English">English</option>
+            <option value="Hindi">Hindi</option>
+            <option value="Marathi">Marathi</option>
+        </select>
+        <button id="themeButton" class="nav-btn" onclick="toggleTheme()">🌙</button>
+        <button class="nav-btn" onclick="goHome()" data-i18n="home">🏠 Home</button>
+        <button class="nav-btn" onclick="goToCommunity()" data-i18n="connectFarmers">👨‍🌾 Community</button>
+        <button class="nav-btn" onclick="goToSchemes()" data-i18n="schemes">🏛 Schemes</button>
+        <button class="nav-btn" onclick="logout()" data-i18n="logout">Logout</button>
+    </div>
+</header>
+
+<main class="community-container">
+    <section class="post-box" style="padding: 28px;">
+        <h1 style="margin-top:0;" data-i18n="yourProfile">Your Profile</h1>
+        <div class="profile-grid">
+            <div class="profile-card">
+                <h3 data-i18n="accountInfo">Account Info</h3>
+                <p><strong data-i18n="nameLabel">Name:</strong> <span id="profileName">-</span></p>
+                <p><strong data-i18n="emailLabel">Email:</strong> <span id="profileEmail">-</span></p>
+                <p><strong data-i18n="joinedLabel">Joined:</strong> <span id="profileJoinDate">-</span></p>
+            </div>
+            <div class="profile-card">
+                <h3 data-i18n="savedSchemes">Saved Schemes</h3>
+                <div id="savedSchemes" class="scheme-grid" style="margin-bottom:0;"></div>
+            </div>
+            <div class="profile-card" style="grid-column: 1 / -1;">
+                <h3 data-i18n="savedPosts">Saved Posts</h3>
+                <div id="savedPosts"></div>
+            </div>
+            <div class="profile-card" style="grid-column: 1 / -1;">
+                <h3 data-i18n="questionHistory">Question History</h3>
+                <div id="profileHistory"></div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script src="i18n.js"></script>
+<script>
+function getJoinedDate() {
+    return localStorage.getItem("joinDate") || "Unknown";
+}
+
+function getEmail() {
+    return localStorage.getItem("userEmail") || "-";
+}
+
+function getSavedSchemes() {
+    return JSON.parse(localStorage.getItem("favoriteSchemes") || "[]");
+}
+
+function getSavedPosts() {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return [];
+    return JSON.parse(localStorage.getItem(`myPosts_${userId}`) || "[]");
+}
+
+function getHistory() {
+    return JSON.parse(localStorage.getItem("agroHistory") || "[]");
+}
+
+function renderSavedSchemes() {
+    const schemes = getSavedSchemes();
+    const container = document.getElementById("savedSchemes");
+
+    if (!container) return;
+    if (!schemes.length) {
+        container.innerHTML = `<p style='color: rgba(27,61,31,0.65);'>${t("noFavorites")}</p>`;
+        return;
+    }
+
+    container.innerHTML = schemes.map(name => `
+        <div class="scheme-card" style="padding: 12px;">
+            <h4 style="margin:0;">${name}</h4>
+        </div>
+    `).join("");
+}
+
+function renderSavedPosts() {
+    const posts = getSavedPosts();
+    const container = document.getElementById("savedPosts");
+
+    if (!container) return;
+    if (!posts.length) {
+        container.innerHTML = "<p style='color: rgba(27,61,31,0.65);'>No posts saved yet.</p>";
+        return;
+    }
+
+    container.innerHTML = posts.map(p => `
+        <div class="comment" style="background: rgba(47,122,62,0.08); margin-bottom: 10px;">
+            <div style="font-weight:600;">${new Date(p.ts).toLocaleString()}</div>
+            <div>${p.content}</div>
+        </div>
+    `).join("");
+}
+
+function renderHistory() {
+    const history = getHistory();
+    const container = document.getElementById("profileHistory");
+
+    if (!container) return;
+    if (!history.length) {
+        container.innerHTML = `<p style='color: rgba(27,61,31,0.65);'>${t("noQuestions")}</p>`;
+        return;
+    }
+
+    container.innerHTML = history.slice(0, 10).map(item => `
+        <div class="history-item">
+            <h4>${item.question}</h4>
+            <p>${item.answer}</p>
+            <small>${new Date(item.ts).toLocaleString()}</small>
+        </div>
+    `).join("");
+}
+
+function initProfile() {
+    if (typeof initI18n === "function") {
+        initI18n();
+    }
+
+    const user = localStorage.getItem("user");
+    if (!user) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    document.getElementById("profileName").innerText = user;
+    document.getElementById("profileEmail").innerText = getEmail();
+    document.getElementById("profileJoinDate").innerText = new Date(getJoinedDate()).toLocaleDateString();
+
+    const welcomeUser = document.getElementById("welcomeUser");
+    if (welcomeUser) {
+        welcomeUser.innerText = t("welcomeUserPrefix") + user;
+    }
+
+    renderSavedSchemes();
+    renderSavedPosts();
+    renderHistory();
+}
+
+function goHome() {
+    window.location.href = "index.html";
+}
+
+function goToCommunity() {
+    window.location.href = "community.html";
+}
+
+function goToSchemes() {
+    window.location.href = "schemes.html";
+}
+
+function goToProfile() {
+    window.location.href = "profile.html";
+}
+
+function logout() {
+    if (confirm(t("confirmLogout"))) {
+        localStorage.removeItem("user");
+        localStorage.removeItem("userId");
+        window.location.href = "login.html";
+    }
+}
+
+initProfile();
+</script>
+
+</body>
+</html>

@@ -13,6 +13,7 @@ idna==3.11
 packaging==26.0
 passlib==1.7.4
 pillow==12.1.1
+psycopg2-binary==2.9.10
 pydantic==2.12.5
 pydantic_core==2.41.5
 pytesseract==0.3.13

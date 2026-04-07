@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - AgroGyanGPT</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="ui.js"></script>
+    <script defer src="api-config.js"></script>
+</head>
+<body class="dashboard-page">
+<div class="page-shell">
+    <header class="top-bar">
+        <div class="brand-left">
+            <div class="brand-mark">AgroGyanGPT Admin</div>
+            <div id="welcomeUser" class="welcome-text">Startup analytics command center</div>
+        </div>
+
+        <div class="top-actions">
+            <button id="themeButton" class="nav-btn" onclick="toggleTheme()" type="button">Theme</button>
+            <button class="nav-btn" onclick="goHome()" type="button">Main App</button>
+            <button class="nav-btn" onclick="goToCommunity()" type="button">Community</button>
+            <button class="nav-btn" onclick="goToSchemes()" type="button">Schemes</button>
+            <button id="authButton" class="nav-btn" type="button">Logout</button>
+        </div>
+    </header>
+
+    <section class="hero-panel premium-hero">
+        <div class="hero-copy">
+            <p class="eyebrow">Admin / Analytics Panel</p>
+            <h1 class="main-title">Agri startup dashboard</h1>
+            <p class="subtitle">Show traction, demand, and active farmer regions in one place so the product feels like a real operating startup, not just a chatbot.</p>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <span class="stat-label">Number of users</span>
+                    <span class="stat-value" id="adminUsersValue">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">AI questions</span>
+                    <span class="stat-value" id="adminQuestionsValue">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Community posts</span>
+                    <span class="stat-value" id="adminPostsValue">0</span>
+                </div>
+            </div>
+        </div>
+
+        <aside class="hero-side">
+            <div class="forecast-card">
+                <span class="meta-label">Admin access</span>
+                <div class="forecast-temp">LIVE</div>
+                <div id="adminHealthHeadline" style="font-size: 1.1rem; font-weight: 700;">Loading platform health...</div>
+                <p id="adminHealthNote" class="subnote" style="color: rgba(255, 244, 207, 0.78); margin-top: 10px;">Checking user activity and engagement signals.</p>
+            </div>
+        </aside>
+    </section>
+
+    <div class="timeline-card admin-toolbar">
+        <div>
+            <p class="eyebrow">Analytics range</p>
+            <h3>Filter and export startup signals</h3>
+        </div>
+        <div class="admin-toolbar-actions">
+            <div class="scheme-tabs">
+                <button class="tab-btn active" type="button" data-range="today" onclick="changeTimeframe(this)">Today</button>
+                <button class="tab-btn" type="button" data-range="week" onclick="changeTimeframe(this)">This Week</button>
+                <button class="tab-btn" type="button" data-range="all" onclick="changeTimeframe(this)">All Time</button>
+            </div>
+            <button class="primary-btn" type="button" onclick="downloadAnalyticsCsv()">Download CSV</button>
+        </div>
+    </div>
+
+    <div class="dashboard-widgets">
+        <div class="timeline-card admin-spotlight">
+            <p class="eyebrow">Crop demand chart</p>
+            <h3>Most searched crops visually</h3>
+            <div id="adminCropChart" class="admin-chart"></div>
+        </div>
+
+        <div class="timeline-card admin-spotlight">
+            <p class="eyebrow">Region chart</p>
+            <h3>Most active regions visually</h3>
+            <div id="adminRegionChart" class="admin-chart"></div>
+        </div>
+
+        <div class="timeline-card admin-spotlight">
+            <p class="eyebrow">Snapshot</p>
+            <h3>Filter summary</h3>
+            <div id="adminSnapshot" class="timeline-list"></div>
+        </div>
+    </div>
+
+    <div class="dashboard-widgets">
+        <div class="timeline-card admin-spotlight">
+            <p class="eyebrow">Most searched crops</p>
+            <h3>What farmers want answers about</h3>
+            <div id="adminTopCrops" class="timeline-list"></div>
+        </div>
+
+        <div class="timeline-card admin-spotlight">
+            <p class="eyebrow">Regions active</p>
+            <h3>Where usage is strongest</h3>
+            <div id="adminRegions" class="timeline-list"></div>
+        </div>
+
+        <div class="timeline-card admin-spotlight">
+            <p class="eyebrow">Regional demand</p>
+            <h3>Question volume by region</h3>
+            <div id="adminRegionActivity" class="timeline-list"></div>
+        </div>
+    </div>
+
+    <div class="dashboard-widgets">
+        <div class="timeline-card admin-spotlight">
+            <p class="eyebrow">Recent users</p>
+            <h3>Newest people entering the platform</h3>
+            <div id="adminRecentUsers" class="timeline-list"></div>
+        </div>
+
+        <div class="timeline-card admin-spotlight">
+            <p class="eyebrow">Platform health</p>
+            <h3>Signals to show in demo mode</h3>
+            <div id="adminPlatformHealth" class="timeline-list"></div>
+        </div>
+
+        <div class="timeline-card admin-spotlight">
+            <p class="eyebrow">What admin can view</p>
+            <h3>High-impact operating ideas</h3>
+            <div class="timeline-list">
+                <div class="timeline-item"><h4>User growth</h4><p>Track total users, verified farmers, and which states are adopting fastest.</p></div>
+                <div class="timeline-item"><h4>Demand intelligence</h4><p>See which crops are searched most often so you know what to build, market, or monetize next.</p></div>
+                <div class="timeline-item"><h4>Regional focus</h4><p>Identify high-activity districts for pilot programs, partnerships, and on-ground demos.</p></div>
+                <div class="timeline-item"><h4>Engagement signals</h4><p>Use AI question count and community usage as early traction proof during startup demos.</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_URL = window.AGRO_API_URL || "http://127.0.0.1:8000";
+let currentTimeframe = "today";
+let latestAnalytics = null;
+
+function ensureAdminAccess() {
+    const currentUser = localStorage.getItem("user");
+    const role = (localStorage.getItem("userRole") || "").toLowerCase();
+    const email = (localStorage.getItem("userEmail") || "").toLowerCase();
+
+    if (!currentUser || (role !== "admin" && email !== "harsh@07gmail.com")) {
+        window.location.replace("login.html");
+        return false;
+    }
+
+    const welcomeUser = document.getElementById("welcomeUser");
+    if (welcomeUser) {
+        welcomeUser.innerText = `Admin signed in: ${currentUser}`;
+    }
+    return true;
+}
+
+function setTheme(theme) {
+    document.body.classList.toggle("dark-mode", theme === "dark");
+    localStorage.setItem("theme", theme);
+    const themeButton = document.getElementById("themeButton");
+    if (themeButton) {
+        themeButton.innerText = theme === "dark" ? "Light" : "Dark";
+    }
+}
+
+function toggleTheme() {
+    const current = document.body.classList.contains("dark-mode") ? "dark" : "light";
+    setTheme(current === "dark" ? "light" : "dark");
+}
+
+function goHome() {
+    window.location.href = "index.html";
+}
+
+function goToCommunity() {
+    window.location.href = "community.html";
+}
+
+function goToSchemes() {
+    window.location.href = "schemes.html";
+}
+
+function logout() {
+    localStorage.removeItem("user");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("isAdmin");
+    window.location.replace("login.html");
+}
+
+function renderList(containerId, items, renderItem) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (!items || !items.length) {
+        container.innerHTML = `<div class="timeline-item"><p>No data yet.</p></div>`;
+        return;
+    }
+
+    container.innerHTML = items.map(renderItem).join("");
+}
+
+function renderBarChart(containerId, items, labelKey, valueKey, suffix = "") {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (!items || !items.length) {
+        container.innerHTML = `<div class="timeline-item"><p>No chart data yet.</p></div>`;
+        return;
+    }
+
+    const maxValue = Math.max(...items.map((item) => Number(item[valueKey]) || 0), 1);
+    container.innerHTML = items.map((item) => {
+        const value = Number(item[valueKey]) || 0;
+        const width = Math.max(12, Math.round((value / maxValue) * 100));
+        return `
+            <div class="admin-chart-row">
+                <div class="admin-chart-label">${item[labelKey]}</div>
+                <div class="admin-chart-track">
+                    <span class="admin-chart-fill" style="width:${width}%"></span>
+                </div>
+                <div class="admin-chart-value">${value}${suffix}</div>
+            </div>
+        `;
+    }).join("");
+}
+
+function renderSnapshot(data) {
+    const snapshot = document.getElementById("adminSnapshot");
+    if (!snapshot) return;
+
+    snapshot.innerHTML = `
+        <div class="timeline-item"><h4>Current filter</h4><p>${currentTimeframe === "all" ? "All Time" : currentTimeframe === "week" ? "This Week" : "Today"}</p></div>
+        <div class="timeline-item"><h4>Generated</h4><p>${new Date(data.generated_at).toLocaleString()}</p></div>
+        <div class="timeline-item"><h4>Verified adoption</h4><p>${data.metrics?.verified_users ?? 0} verified users in this view.</p></div>
+    `;
+}
+
+function changeTimeframe(button) {
+    currentTimeframe = button.dataset.range || "all";
+    document.querySelectorAll("[data-range]").forEach((item) => item.classList.remove("active"));
+    button.classList.add("active");
+    loadAdminAnalytics();
+}
+
+function buildCsvSection(title, rows, headers) {
+    const lines = [[title], headers];
+    rows.forEach((row) => {
+        lines.push(headers.map((header) => String(row[header] ?? "")));
+    });
+    lines.push([]);
+    return lines;
+}
+
+function downloadAnalyticsCsv() {
+    if (!latestAnalytics) return;
+
+    const rows = [
+        ["AgroGyanGPT Admin Analytics"],
+        ["Timeframe", currentTimeframe],
+        ["Generated At", latestAnalytics.generated_at || ""],
+        []
+    ];
+
+    rows.push(["Metric", "Value"]);
+    Object.entries(latestAnalytics.metrics || {}).forEach(([key, value]) => {
+        rows.push([key, value]);
+    });
+    rows.push([]);
+
+    buildCsvSection("Top Crops", latestAnalytics.top_crops || [], ["crop", "count"]).forEach((line) => rows.push(line));
+    buildCsvSection("Active Regions", latestAnalytics.active_regions || [], ["region", "users"]).forEach((line) => rows.push(line));
+    buildCsvSection("Region Activity", latestAnalytics.region_activity || [], ["region", "questions"]).forEach((line) => rows.push(line));
+
+    const csv = rows.map((line) => line.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `agrogyan-admin-${currentTimeframe}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+}
+
+async function loadAdminAnalytics() {
+    const email = localStorage.getItem("userEmail") || "";
+
+    try {
+        const response = await fetch(`${API_URL}/admin/analytics?user_email=${encodeURIComponent(email)}&timeframe=${encodeURIComponent(currentTimeframe)}`);
+        if (!response.ok) {
+            throw new Error(`admin analytics failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        latestAnalytics = data;
+        document.getElementById("adminUsersValue").innerText = data.metrics?.users ?? 0;
+        document.getElementById("adminQuestionsValue").innerText = data.metrics?.questions ?? 0;
+        document.getElementById("adminPostsValue").innerText = data.metrics?.posts ?? 0;
+
+        const verifiedUsers = data.metrics?.verified_users ?? 0;
+        const totalUsers = data.metrics?.users ?? 0;
+        document.getElementById("adminHealthHeadline").innerText = `${verifiedUsers} verified users on platform`;
+        document.getElementById("adminHealthNote").innerText = `${totalUsers} users, ${data.metrics?.questions ?? 0} AI questions, and ${data.metrics?.posts ?? 0} posts in this filter.`;
+
+        renderList("adminTopCrops", data.top_crops, (item) => `
+            <div class="timeline-item admin-metric-row">
+                <h4>${item.crop}</h4>
+                <p>${item.count} search signals</p>
+            </div>
+        `);
+
+        renderList("adminRegions", data.active_regions, (item) => `
+            <div class="timeline-item admin-metric-row">
+                <h4>${item.region}</h4>
+                <p>${item.users} registered users</p>
+            </div>
+        `);
+
+        renderList("adminRegionActivity", data.region_activity, (item) => `
+            <div class="timeline-item admin-metric-row">
+                <h4>${item.region}</h4>
+                <p>${item.questions} AI questions asked</p>
+            </div>
+        `);
+
+        renderList("adminRecentUsers", data.recent_users, (item) => `
+            <div class="timeline-item">
+                <h4>${item.name}</h4>
+                <p>${item.email}</p>
+                <p>${item.region} | ${item.role}</p>
+            </div>
+        `);
+
+        renderList("adminPlatformHealth", data.platform_health, (item) => `
+            <div class="timeline-item admin-metric-row">
+                <h4>${item.label}</h4>
+                <p>${item.value}</p>
+            </div>
+        `);
+
+        renderBarChart("adminCropChart", data.top_crops || [], "crop", "count");
+        renderBarChart("adminRegionChart", data.active_regions || [], "region", "users");
+        renderSnapshot(data);
+    } catch (error) {
+        console.error(error);
+        document.getElementById("adminHealthHeadline").innerText = "Unable to load analytics";
+        document.getElementById("adminHealthNote").innerText = "Check that the backend is running, then refresh the admin panel.";
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (!ensureAdminAccess()) return;
+    setTheme(localStorage.getItem("theme") || "light");
+    const authButton = document.getElementById("authButton");
+    if (authButton) authButton.onclick = logout;
+    loadAdminAnalytics();
+});
+
+window.changeTimeframe = changeTimeframe;
+window.downloadAnalyticsCsv = downloadAnalyticsCsv;
+</script>
+</body>
+</html>

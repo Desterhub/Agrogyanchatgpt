@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroGyanGPT | Crop Care</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="ui.js"></script>
+    <script defer src="api-config.js"></script>
+    <script defer src="i18n.js"></script>
+    <script defer src="script.js"></script>
+    <script defer src="farmer-pages.js"></script>
+</head>
+<body data-page="crop-care">
+<div class="page-shell">
+    <header class="top-bar">
+        <div class="brand-left">
+            <div class="brand-mark">AgroGyanGPT</div>
+            <div id="welcomeUser" class="welcome-text">Crop protection and AI advisory</div>
+        </div>
+        <div class="top-actions">
+            <select id="uiLanguage" class="lang-select" aria-label="UI Language">
+                <option value="English">English</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Marathi">Marathi</option>
+            </select>
+            <button id="themeButton" class="nav-btn" type="button" onclick="toggleTheme()">Theme</button>
+            <a class="nav-btn" href="index.html">Home</a>
+            <a class="nav-btn" href="my-farm.html">My Farm</a>
+            <a class="nav-btn" href="market.html">Market</a>
+            <a class="nav-btn" href="schemes.html">Schemes</a>
+            <button id="authButton" class="nav-btn" type="button"></button>
+        </div>
+    </header>
+
+    <section class="hero-panel">
+        <div class="hero-copy">
+            <p class="eyebrow">Crop care</p>
+            <h1 class="main-title">Disease, pest, and planting decisions in one place.</h1>
+            <p class="subtitle">This page groups the advisory tools that were crowding your homepage. Farmers can come here when they need diagnosis, risk alerts, or help deciding what to grow next.</p>
+            <div class="hero-stats">
+                <div class="stat-card"><span class="stat-label">Pest risk</span><span class="stat-value" id="pestRiskTitle">Loading...</span></div>
+                <div class="stat-card"><span class="stat-label">Memory</span><span class="stat-value" id="memoryTitle">Learning</span></div>
+                <div class="stat-card"><span class="stat-label">Mode</span><span class="stat-value">Practical AI</span></div>
+            </div>
+        </div>
+        <aside class="hero-side">
+            <div class="forecast-card">
+                <span class="meta-label">AI crop watch</span>
+                <div class="forecast-temp">24x7</div>
+                <div style="font-size: 1.1rem; font-weight: 700;">Diagnosis + action support</div>
+                <p class="subnote" style="color: rgba(255, 244, 207, 0.78); margin-top: 10px;">Run fast checks here before calling an expert or making a costly field decision.</p>
+            </div>
+        </aside>
+    </section>
+
+    <main class="community-container">
+        <section class="dashboard-widgets">
+            <div class="timeline-card"><p class="eyebrow">Pest outbreak risk</p><h3>Current risk signal</h3><div id="pestRiskBody" class="timeline-list"></div></div>
+            <div class="timeline-card"><p class="eyebrow">Chatbot memory</p><h3>What AgroGyanGPT remembers</h3><div id="memoryBody" class="timeline-list"></div></div>
+            <div class="timeline-card"><p class="eyebrow">Live field alerts</p><h3>What needs attention</h3><div id="liveAlertsBody" class="timeline-list"></div></div>
+        </section>
+
+        <section class="post-box startup-tool-card">
+            <div class="section-header"><div><p class="eyebrow">AI crop doctor</p><h2 class="section-title">Upload a crop image</h2></div></div>
+            <input id="cropDoctorInput" type="file" accept="image/*">
+            <button class="primary-btn" type="button" onclick="runCropDoctor()">Analyze leaf or crop issue</button>
+            <div id="cropDoctorResult" class="timeline-list"></div>
+        </section>
+
+        <section class="dashboard-widgets">
+            <div class="timeline-card">
+                <p class="eyebrow">Decision engine</p>
+                <h3>Should I grow this crop?</h3>
+                <div class="decision-form-grid">
+                    <label><span>Crop</span><select id="decisionCrop"><option value="Tomato">Tomato</option><option value="Capsicum">Capsicum</option><option value="Paddy">Paddy</option><option value="Wheat">Wheat</option><option value="Cotton">Cotton</option><option value="Soybean">Soybean</option><option value="Sugarcane">Sugarcane</option><option value="Mustard">Mustard</option><option value="Onion">Onion</option></select></label>
+                    <label><span>Location</span><input id="decisionLocation" type="text" placeholder="District, State"></label>
+                    <label><span>Budget</span><input id="decisionBudget" type="text" placeholder="50000"></label>
+                </div>
+                <div class="section-header"><div class="decision-badge grow" id="decisionGrowBadge">Grow Tomato</div><button class="primary-btn" type="button" onclick="runDecisionEngine()">Run decision</button></div>
+                <div class="decision-metrics decision-metrics-compact">
+                    <div class="decision-metric"><span class="metric-label">Expected ROI</span><strong id="decisionRoiValue">0%</strong></div>
+                    <div class="decision-metric"><span class="metric-label">Risk level</span><strong id="decisionRiskValue">-</strong></div>
+                </div>
+                <div class="decision-alt-card"><span class="metric-label">Suggested alternative</span><strong id="decisionAltValue">-</strong><p id="decisionAltReason">Run the decision engine to see the safer alternative crop.</p></div>
+            </div>
+
+            <div class="timeline-card">
+                <p class="eyebrow">Compare options</p>
+                <h3>Compare crop decisions</h3>
+                <div class="decision-form-grid">
+                    <label><span>Crop one</span><select id="compareCropOne"><option value="Tomato">Tomato</option><option value="Capsicum">Capsicum</option><option value="Paddy">Paddy</option><option value="Wheat">Wheat</option><option value="Cotton">Cotton</option><option value="Soybean">Soybean</option><option value="Sugarcane">Sugarcane</option><option value="Mustard">Mustard</option><option value="Onion">Onion</option></select></label>
+                    <label><span>Crop two</span><select id="compareCropTwo"><option value="Onion">Onion</option><option value="Tomato">Tomato</option><option value="Capsicum">Capsicum</option><option value="Paddy">Paddy</option><option value="Wheat">Wheat</option><option value="Cotton">Cotton</option><option value="Soybean">Soybean</option><option value="Sugarcane">Sugarcane</option><option value="Mustard">Mustard</option></select></label>
+                    <label><span>Budget</span><input id="compareBudget" type="text" placeholder="50000"></label>
+                </div>
+                <button class="primary-btn" type="button" onclick="runCompareDecisions()">Compare now</button>
+                <div class="comparison-table">
+                    <div class="comparison-row comparison-head"><span>Crop</span><span>Expected profit</span><span>Risk</span></div>
+                    <div class="comparison-row"><strong id="compareNameOne">Tomato</strong><span id="compareProfitOne">-</span><span id="compareRiskOne">-</span></div>
+                    <div class="comparison-row"><strong id="compareNameTwo">Onion</strong><span id="compareProfitTwo">-</span><span id="compareRiskTwo">-</span></div>
+                </div>
+                <div id="compareInsight" class="timeline-list"></div>
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroGyanGPT | My Farm</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="ui.js"></script>
+    <script defer src="api-config.js"></script>
+    <script defer src="i18n.js"></script>
+    <script defer src="farmer-pages.js"></script>
+</head>
+<body data-page="my-farm">
+<div class="page-shell">
+    <header class="top-bar">
+        <div class="brand-left">
+            <div class="brand-mark">AgroGyanGPT</div>
+            <div id="welcomeUser" class="welcome-text">Farm setup and planning</div>
+        </div>
+        <div class="top-actions">
+            <select id="uiLanguage" class="lang-select" aria-label="UI Language">
+                <option value="English">English</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Marathi">Marathi</option>
+            </select>
+            <button id="themeButton" class="nav-btn" type="button" onclick="toggleTheme()" data-i18n="theme">Theme</button>
+            <a class="nav-btn" href="index.html">Home</a>
+            <a class="nav-btn" href="crop-care.html" data-i18n="cropCare">Crop Care</a>
+            <a class="nav-btn" href="market.html" data-i18n="market">Market</a>
+            <a class="nav-btn" href="schemes.html">Schemes</a>
+            <a class="nav-btn" href="profile.html">Profile</a>
+            <button id="authButton" class="nav-btn" type="button"></button>
+        </div>
+    </header>
+
+    <section class="hero-panel">
+        <div class="hero-copy">
+            <p class="eyebrow" data-i18n="myFarm">Farmer setup</p>
+            <h1 class="main-title" data-i18n="myFarmHeroTitle">Build the farm profile behind your AI answers.</h1>
+            <p class="subtitle" data-i18n="myFarmHeroSubtitle">Everything here improves personalization. Set your crop, land, soil, season, irrigation, and village once, and AgroGyanGPT can adapt advice across weather, planning, crop care, and schemes.</p>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <span class="stat-label">Primary crop</span>
+                    <span class="stat-value" id="farmPrimaryCropBadge">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Land size</span>
+                    <span class="stat-value" id="farmLandBadge">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">District</span>
+                    <span class="stat-value" id="farmDistrictBadge">-</span>
+                </div>
+            </div>
+        </div>
+        <aside class="hero-side">
+            <div class="forecast-card">
+                <span class="meta-label">Farm setup status</span>
+                <div class="forecast-temp" id="farmSetupStatus">Ready</div>
+                <div style="font-size: 1.1rem; font-weight: 700;">Personalized dashboard inputs</div>
+                <p class="subnote" style="color: rgba(255, 244, 207, 0.78); margin-top: 10px;">Use this page as the real farmer setup center instead of keeping all these fields on the homepage.</p>
+            </div>
+        </aside>
+    </section>
+
+    <main class="community-container">
+        <section class="post-box">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Core details</p>
+                    <h2 class="section-title">My farm setup</h2>
+                </div>
+                <div class="shortcut-inline">
+                    <a class="nav-btn" href="profile.html">Open full profile</a>
+                </div>
+            </div>
+
+            <div class="decision-form-grid decision-form-grid-wide">
+                <label><span>Main crop</span><select id="farmCrop"><option value="Wheat">Wheat</option><option value="Paddy">Paddy</option><option value="Cotton">Cotton</option><option value="Soybean">Soybean</option><option value="Sugarcane">Sugarcane</option><option value="Tomato">Tomato</option><option value="Onion">Onion</option></select></label>
+                <label><span>Land size</span><input id="farmLand" type="text" placeholder="e.g. 3 acres"></label>
+                <label><span>Soil type</span><select id="farmSoil"><option value="Loamy">Loamy</option><option value="Black">Black</option><option value="Sandy">Sandy</option><option value="Clay">Clay</option></select></label>
+                <label><span>Season</span><select id="farmSeason"><option value="Rabi">Rabi</option><option value="Kharif">Kharif</option><option value="Summer">Summer</option><option value="Harvest">Harvest</option></select></label>
+                <label><span>Village</span><input id="farmVillage" type="text" placeholder="Village or farm name"></label>
+                <label><span>Preferred language</span><select id="farmLanguage"><option value="English">English</option><option value="Hindi">Hindi</option><option value="Marathi">Marathi</option></select></label>
+                <label><span>Irrigation type</span><input id="farmIrrigation" type="text" placeholder="Drip / Canal / Borewell"></label>
+                <label><span>Taluka</span><input id="farmTaluka" type="text" placeholder="Taluka"></label>
+                <label><span>Farm name</span><input id="farmName" type="text" placeholder="Farm name"></label>
+            </div>
+
+            <div class="section-header">
+                <div id="farmSaveMessage" class="small-note">Save your farm profile to improve AI suggestions.</div>
+                <button class="primary-btn" type="button" onclick="saveMyFarmSetup()" data-i18n="saveMyFarmSetup">Save My Farm Setup</button>
+            </div>
+        </section>
+
+        <section class="dashboard-widgets">
+            <div class="timeline-card">
+                <p class="eyebrow">Farm profile</p>
+                <h3>Your stored foundation</h3>
+                <div id="farmProfileBody" class="timeline-list"></div>
+            </div>
+            <div class="timeline-card">
+                <p class="eyebrow">Farm planner</p>
+                <h3 id="plannerTitle">Loading planner...</h3>
+                <div id="plannerTasks" class="timeline-list"></div>
+            </div>
+            <div class="timeline-card">
+                <p class="eyebrow">Suggested schemes</p>
+                <h3>Matches for this farm</h3>
+                <div id="schemeMatches" class="timeline-list"></div>
+            </div>
+        </section>
+
+        <section class="dashboard-widgets">
+            <div class="timeline-card">
+                <p class="eyebrow" data-i18n="cropCalendar">Crop calendar</p>
+                <h3 data-i18n="cropCalendar">Crop calendar</h3>
+                <div id="cropCalendarList" class="timeline-list"></div>
+            </div>
+            <div class="timeline-card">
+                <p class="eyebrow" data-i18n="reminders">Reminders</p>
+                <h3 data-i18n="reminders">Reminders</h3>
+                <div id="reminderList" class="timeline-list"></div>
+            </div>
+            <div class="timeline-card">
+                <p class="eyebrow">Field awareness</p>
+                <h3>Live field alerts</h3>
+                <div id="liveAlertsBody" class="timeline-list"></div>
+            </div>
+            <div class="timeline-card">
+                <p class="eyebrow">Map context</p>
+                <h3 id="mapTitle">Nearby context</h3>
+                <div id="mapLayers" class="timeline-list"></div>
+            </div>
+            <div class="timeline-card">
+                <p class="eyebrow">Next pages</p>
+                <h3>Use setup across the product</h3>
+                <div class="timeline-list">
+                    <div class="timeline-item"><h4><a href="crop-care.html">Open Crop Care</a></h4><p>Run diagnosis and AI crop decisions using your saved farm profile.</p></div>
+                    <div class="timeline-item"><h4><a href="market.html">Open Market Desk</a></h4><p>See prices and selling signals with your location and crop in context.</p></div>
+                    <div class="timeline-item"><h4><a href="schemes.html">Open Schemes</a></h4><p>Check support opportunities after your farm details are complete.</p></div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

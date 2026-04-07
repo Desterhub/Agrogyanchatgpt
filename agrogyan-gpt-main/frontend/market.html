@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroGyanGPT | Market Desk</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="ui.js"></script>
+    <script defer src="api-config.js"></script>
+    <script defer src="i18n.js"></script>
+    <script defer src="script.js"></script>
+    <script defer src="farmer-pages.js"></script>
+</head>
+<body data-page="market">
+<div class="page-shell">
+    <header class="top-bar">
+        <div class="brand-left">
+            <div class="brand-mark">AgroGyanGPT</div>
+            <div id="welcomeUser" class="welcome-text">Market intelligence and selling tools</div>
+        </div>
+        <div class="top-actions">
+            <select id="uiLanguage" class="lang-select" aria-label="UI Language">
+                <option value="English">English</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Marathi">Marathi</option>
+            </select>
+            <button id="themeButton" class="nav-btn" type="button" onclick="toggleTheme()" data-i18n="theme">Theme</button>
+            <a class="nav-btn" href="index.html">Home</a>
+            <a class="nav-btn" href="my-farm.html" data-i18n="myFarm">My Farm</a>
+            <a class="nav-btn" href="crop-care.html" data-i18n="cropCare">Crop Care</a>
+            <a class="nav-btn" href="schemes.html">Schemes</a>
+            <button id="authButton" class="nav-btn" type="button"></button>
+        </div>
+    </header>
+
+    <section class="hero-panel">
+        <div class="hero-copy">
+            <p class="eyebrow" data-i18n="marketDesk">Market desk</p>
+            <h1 class="main-title" data-i18n="marketHeroTitle">Prices, selling signals, and business decisions in one place.</h1>
+            <p class="subtitle" data-i18n="marketHeroSubtitle">This page keeps your money-side tools together so the homepage can stay short. Farmers can come here for mandi rates, market prediction, expected profit, and nearby agri ecosystem support.</p>
+            <div class="hero-stats">
+                <div class="stat-card"><span class="stat-label">Market mood</span><span class="stat-value" id="marketMoodCard">Stable</span></div>
+                <div class="stat-card"><span class="stat-label">Top crop</span><span class="stat-value" id="topCropCard">Wheat</span></div>
+                <div class="stat-card"><span class="stat-label">Today focus</span><span class="stat-value" id="marketPredictionTitle">Loading...</span></div>
+            </div>
+        </div>
+        <aside class="hero-side">
+            <div class="forecast-card">
+                <span class="meta-label">Local mandi board</span>
+                <div class="forecast-temp" id="heroLocationLabel">Pune</div>
+                <div style="font-size: 1.1rem; font-weight: 700;">Location-linked market view</div>
+                <p class="subnote" style="color: rgba(255, 244, 207, 0.78); margin-top: 10px;">Track current prices first, then move to profit and ecosystem planning below.</p>
+            </div>
+        </aside>
+    </section>
+
+    <main class="community-container">
+        <section class="dashboard-widgets">
+            <div class="market-board"><p class="eyebrow">Market rates</p><h3>Today&apos;s mandi prices</h3><div id="marketGrid" class="market-list"></div></div>
+            <div class="timeline-card"><p class="eyebrow">Prediction</p><h3>Sell window</h3><div id="marketPredictionBody" class="timeline-list"></div></div>
+            <div class="timeline-card"><p class="eyebrow">Weather effect</p><h3>Weather-linked signal</h3><div id="weatherAlertsList" class="timeline-list"></div></div>
+        </section>
+
+        <section class="dashboard-widgets">
+            <div class="timeline-card">
+                <p class="eyebrow" data-i18n="priceTrend">Price trend</p>
+                <h3 data-i18n="priceTrend">Price trend</h3>
+                <div id="marketTrendBody" class="timeline-list"></div>
+            </div>
+            <div class="timeline-card">
+                <p class="eyebrow" data-i18n="sellNowWait">Sell now or wait?</p>
+                <h3 data-i18n="sellNowWait">Sell now or wait?</h3>
+                <div id="sellDecisionBody" class="timeline-list"></div>
+            </div>
+        </section>
+
+        <section class="dashboard-widgets">
+            <div class="timeline-card">
+                <p class="eyebrow">Profit calculator</p>
+                <h3>Estimate possible profit</h3>
+                <div class="decision-form-grid">
+                    <label><span>Crop</span><select id="profitCrop"><option value="Tomato">Tomato</option><option value="Capsicum">Capsicum</option><option value="Paddy">Paddy</option><option value="Wheat">Wheat</option><option value="Cotton">Cotton</option><option value="Soybean">Soybean</option><option value="Sugarcane">Sugarcane</option><option value="Mustard">Mustard</option><option value="Onion">Onion</option></select></label>
+                    <label><span>Investment</span><input id="profitInvestment" type="text" placeholder="50000"></label>
+                </div>
+                <div class="section-header"><button class="primary-btn" type="button" onclick="runProfitCalculator()">Calculate</button><div class="shortcut-inline"><span class="badge-chip active">Farmer business view</span></div></div>
+                <div class="decision-metrics decision-metrics-compact">
+                    <div class="decision-metric"><span class="metric-label">Expected profit</span><strong id="profitResultValue">₹0</strong></div>
+                    <div class="decision-metric"><span class="metric-label">Risk</span><strong id="profitRiskValue">-</strong></div>
+                </div>
+                <div id="profitInsight" class="timeline-list"></div>
+            </div>
+
+            <div class="timeline-card">
+                <p class="eyebrow">Nearby ecosystem map</p>
+                <h3 id="mapTitle">Find nearby agri support</h3>
+                <div class="map-search-row">
+                    <select id="mapState" aria-label="Map state"><option value="">Select state</option></select>
+                    <select id="mapDistrict" aria-label="Map district" disabled><option value="">Select district / city</option></select>
+                </div>
+                <input id="mapCustomSearch" type="text" placeholder="Or search custom village / town">
+                <div class="ecosystem-chips" style="margin: 14px 0;">
+                    <button class="map-chip active" data-ecosystem-type="mandi" type="button" onclick="setEcosystemType(this)">Mandis</button>
+                    <button class="map-chip" data-ecosystem-type="fertilizer" type="button" onclick="setEcosystemType(this)">Fertilizer</button>
+                    <button class="map-chip" data-ecosystem-type="cold_storage" type="button" onclick="setEcosystemType(this)">Cold storage</button>
+                </div>
+                <input id="googleMapsApiKey" type="password" placeholder="Optional Google Maps API key">
+                <div class="section-header"><button class="nav-btn" type="button" onclick="saveGoogleMapsApiKey()">Save key</button><button class="primary-btn" type="button" onclick="loadNearbyEcosystemMap()">Load nearby ecosystem</button></div>
+                <div id="ecosystemMap" class="google-map-panel">Nearby agri ecosystem results will appear here.</div>
+                <div id="ecosystemResults" class="timeline-list"></div>
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

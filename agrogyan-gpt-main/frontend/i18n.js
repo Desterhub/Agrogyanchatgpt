@@ -33,6 +33,14 @@ const UI_TRANSLATIONS = {
         noHistory: "No history yet. Ask a question to start.",
         yourHistory: "Your History",
         noSchemes: "No schemes found.",
+        tabAll: "All",
+        tabIncome: "Income",
+        tabInsurance: "Insurance",
+        tabLoans: "Loans",
+        tabIrrigation: "Irrigation",
+        tabTech: "Tech",
+        tabFavorites: "Favorites",
+        applyLearnMore: "Apply / Learn more",
 
         // Auth
         loginTitle: "Login",
@@ -100,6 +108,7 @@ const UI_TRANSLATIONS = {
         speechRecognitionNotSupported: "Speech recognition not supported in this browser.",
 
         writeSomethingFirst: "Write something first",
+        pleaseLoginToPost: "Please login to post.",
         postedSuccess: "Posted! Your post is now live.",
         unableToPost: "Unable to post. Check your backend.",
         unableToLoadPosts: "Unable to load posts. Is the backend running?",
@@ -346,6 +355,7 @@ function getUILanguage() {
 function setUILanguage(lang) {
     localStorage.setItem("uiLanguage", lang);
     applyTranslations();
+    window.dispatchEvent(new CustomEvent("ui-language-changed", { detail: { lang } }));
 }
 
 function t(key) {
@@ -390,6 +400,15 @@ function applyTranslations() {
         }
     });
 
+    document.querySelectorAll("[data-i18n-aria-label]").forEach(el => {
+        const key = el.getAttribute("data-i18n-aria-label");
+        if (dict[key]) {
+            el.setAttribute("aria-label", dict[key]);
+        }
+    });
+
+    applyExactTextTranslations(lang);
+
     // Sync language selector
     const selector = document.getElementById("uiLanguage");
     if (selector) {
@@ -406,8 +425,319 @@ function initI18n() {
     applyTranslations();
 }
 
+const EXTRA_UI_TRANSLATIONS = {
+    English: {
+        myFarm: "My Farm",
+        cropCare: "Crop Care",
+        market: "Market",
+        community: "Community",
+        theme: "Theme",
+        light: "Light",
+        dark: "Dark",
+        todayActions: "What should I do today?",
+        voiceAssistant: "Voice-first chatbot",
+        startVoice: "Start voice mode",
+        voiceTips: "Voice tips",
+        cropCalendar: "Crop calendar",
+        reminders: "Reminders",
+        schemeEligibility: "Scheme eligibility",
+        documentChecklist: "Document checklist",
+        priceTrend: "Price trend",
+        sellNowWait: "Sell now or wait?",
+        saveMyFarmSetup: "Save My Farm Setup",
+        marketDesk: "Market Desk",
+        todayMandiPrices: "Today's mandi prices",
+        estimateProfit: "Estimate possible profit",
+        nearbyAgriSupport: "Find nearby agri support",
+        selectState: "Select state",
+        selectDistrictCity: "Select district / city",
+        sendOtp: "Send OTP",
+        verifyOtpRegister: "Verify OTP & Register",
+        resendOtp: "Resend OTP",
+        mobileNumber: "Mobile number",
+        selectRole: "Select role",
+        selectStatePrompt: "Select state",
+        selectDistrictPrompt: "Select district / city",
+        smsOtp: "SMS OTP",
+        whatsappOtp: "WhatsApp OTP",
+        enterOtp: "Enter 6-digit OTP",
+        preferredLanguage: "Preferred language",
+        farmer: "Farmer",
+        agriAdvisor: "Agri advisor",
+        mandiBuyer: "Mandi buyer",
+        todayCardSummary: "Top actions for your farm today",
+        schemeSupportDesk: "Support navigator",
+        postCommunity: "Post to the community",
+        searchCommunity: "Search community posts...",
+        refresh: "Refresh",
+        loading: "Loading..."
+        ,
+        welcomeBack: "Welcome back",
+        verifiedGuidance: "Verified agricultural guidance",
+        trustedByFarmers: "Trusted by farmers",
+        recordsDocumentsData: "Data from records and uploaded documents",
+        otpFlowNote: "Choose SMS or WhatsApp, receive OTP on your phone, then verify to create the account.",
+        loggingIn: "Logging in...",
+        sendingOtp: "Sending OTP...",
+        registering: "Registering...",
+        validMobileNumber: "Please enter a valid 10-digit mobile number",
+        otpResent: "OTP resent.",
+        otpSent: "OTP sent.",
+        otpInstruction: "Check your phone and enter the 6-digit code.",
+        unableToSendOtp: "Unable to send OTP right now.",
+        enterOtpPrompt: "Enter the 6-digit OTP sent to your phone."
+        ,
+        homeDashboard: "Home dashboard",
+        homeHeroTitle: "Farm answers for today, not everything at once.",
+        homeHeroSubtitle: "This homepage now keeps only the most important daily-use tools: chatbot, weather, smart alerts, mandi prices, quick AI briefing, and direct shortcuts to deeper pages.",
+        askAgro: "Ask AgroGyanGPT",
+        mainAiWorkspace: "Main AI workspace",
+        dailyHelpText: "This is the main space of the website. Ask anything about crop care, weather timing, mandi prices, farming decisions, or government support.",
+        myFarmHeroTitle: "Build the farm profile behind your AI answers.",
+        myFarmHeroSubtitle: "Everything here improves personalization. Set your crop, land, soil, season, irrigation, and village once, and AgroGyanGPT can adapt advice across weather, planning, crop care, and schemes.",
+        marketHeroTitle: "Prices, selling signals, and business decisions in one place.",
+        marketHeroSubtitle: "This page keeps your money-side tools together so the homepage can stay short. Farmers can come here for mandi rates, market prediction, expected profit, and nearby agri ecosystem support."
+    },
+    Hindi: {
+        myFarm: "मेरा खेत",
+        cropCare: "फसल देखभाल",
+        market: "बाज़ार",
+        community: "समुदाय",
+        theme: "थीम",
+        light: "लाइट",
+        dark: "डार्क",
+        todayActions: "आज मुझे क्या करना चाहिए?",
+        voiceAssistant: "वॉइस-फर्स्ट चैटबॉट",
+        startVoice: "वॉइस मोड शुरू करें",
+        voiceTips: "वॉइस सुझाव",
+        cropCalendar: "फसल कैलेंडर",
+        reminders: "रिमाइंडर",
+        schemeEligibility: "योजना पात्रता",
+        documentChecklist: "दस्तावेज़ चेकलिस्ट",
+        priceTrend: "कीमत रुझान",
+        sellNowWait: "अभी बेचें या इंतज़ार करें?",
+        saveMyFarmSetup: "मेरा खेत सेटअप सेव करें",
+        marketDesk: "मार्केट डेस्क",
+        todayMandiPrices: "आज के मंडी भाव",
+        estimateProfit: "संभावित लाभ का अनुमान",
+        nearbyAgriSupport: "नज़दीकी कृषि सहायता खोजें",
+        selectState: "राज्य चुनें",
+        selectDistrictCity: "ज़िला / शहर चुनें",
+        sendOtp: "ओटीपी भेजें",
+        verifyOtpRegister: "ओटीपी सत्यापित करें और पंजीकरण करें",
+        resendOtp: "ओटीपी फिर भेजें",
+        mobileNumber: "मोबाइल नंबर",
+        selectRole: "भूमिका चुनें",
+        selectStatePrompt: "राज्य चुनें",
+        selectDistrictPrompt: "ज़िला / शहर चुनें",
+        smsOtp: "एसएमएस ओटीपी",
+        whatsappOtp: "व्हाट्सऐप ओटीपी",
+        enterOtp: "6 अंकों का ओटीपी दर्ज करें",
+        preferredLanguage: "पसंदीदा भाषा",
+        farmer: "किसान",
+        agriAdvisor: "कृषि सलाहकार",
+        mandiBuyer: "मंडी खरीदार",
+        todayCardSummary: "आज आपके खेत के लिए सबसे ज़रूरी काम",
+        schemeSupportDesk: "सहायता नेविगेटर",
+        postCommunity: "समुदाय में पोस्ट करें",
+        searchCommunity: "समुदाय पोस्ट खोजें...",
+        refresh: "रिफ्रेश",
+        loading: "लोड हो रहा है...",
+        welcomeBack: "फिर से स्वागत है",
+        verifiedGuidance: "सत्यापित कृषि मार्गदर्शन",
+        trustedByFarmers: "किसानों द्वारा भरोसेमंद",
+        recordsDocumentsData: "रिकॉर्ड और अपलोड दस्तावेज़ों से डेटा",
+        otpFlowNote: "एसएमएस या व्हाट्सऐप चुनें, फोन पर ओटीपी प्राप्त करें, फिर सत्यापित करके खाता बनाएँ।",
+        loggingIn: "लॉगिन हो रहा है...",
+        sendingOtp: "ओटीपी भेजा जा रहा है...",
+        registering: "पंजीकरण हो रहा है...",
+        validMobileNumber: "कृपया सही 10 अंकों का मोबाइल नंबर दर्ज करें",
+        otpResent: "ओटीपी फिर भेजा गया।",
+        otpSent: "ओटीपी भेजा गया।",
+        otpInstruction: "फोन देखें और 6 अंकों का कोड दर्ज करें।",
+        unableToSendOtp: "अभी ओटीपी भेजा नहीं जा सका।",
+        enterOtpPrompt: "फोन पर भेजा गया 6 अंकों का ओटीपी दर्ज करें।",
+        homeDashboard: "होम डैशबोर्ड",
+        homeHeroTitle: "आज के लिए खेती के जवाब, सब कुछ एक साथ नहीं।",
+        homeHeroSubtitle: "यह होमपेज केवल सबसे ज़रूरी रोज़मर्रा के टूल रखता है: चैटबॉट, मौसम, स्मार्ट अलर्ट, मंडी भाव, एआई ब्रीफिंग और बाकी पेजों के शॉर्टकट।",
+        askAgro: "AgroGyanGPT से पूछें",
+        mainAiWorkspace: "मुख्य एआई कार्यक्षेत्र",
+        dailyHelpText: "यह वेबसाइट का मुख्य भाग है। फसल, मौसम, मंडी भाव, खेती के फैसले या सरकारी सहायता के बारे में पूछें।",
+        myFarmHeroTitle: "अपने एआई जवाबों के पीछे का खेत प्रोफ़ाइल बनाइए।",
+        myFarmHeroSubtitle: "यहाँ की जानकारी निजीकरण बेहतर करती है। फसल, ज़मीन, मिट्टी, मौसम, सिंचाई और गाँव सेट करें ताकि AgroGyanGPT बेहतर सलाह दे सके।",
+        marketHeroTitle: "भाव, बिक्री संकेत और व्यावसायिक फैसले एक ही जगह।",
+        marketHeroSubtitle: "यह पेज आपके बाज़ार वाले टूल्स को एक जगह रखता है ताकि होमपेज छोटा रहे। यहाँ मंडी भाव, पूर्वानुमान, लाभ और आसपास की कृषि सुविधा देखें।"
+    },
+    Marathi: {
+        myFarm: "माझे शेत",
+        cropCare: "पीक काळजी",
+        market: "बाजार",
+        community: "समुदाय",
+        theme: "थीम",
+        light: "लाईट",
+        dark: "डार्क",
+        todayActions: "आज मला काय करायला हवे?",
+        voiceAssistant: "व्हॉइस-फर्स्ट चॅटबॉट",
+        startVoice: "व्हॉइस मोड सुरू करा",
+        voiceTips: "व्हॉइस टिप्स",
+        cropCalendar: "पीक कॅलेंडर",
+        reminders: "रिमाइंडर",
+        schemeEligibility: "योजना पात्रता",
+        documentChecklist: "दस्तऐवज तपासणी यादी",
+        priceTrend: "भावाचा ट्रेंड",
+        sellNowWait: "आता विकायचे की थांबायचे?",
+        saveMyFarmSetup: "माझे शेत सेटअप सेव्ह करा",
+        marketDesk: "मार्केट डेस्क",
+        todayMandiPrices: "आजचे मंडी भाव",
+        estimateProfit: "संभाव्य नफ्याचा अंदाज",
+        nearbyAgriSupport: "जवळची कृषी मदत शोधा",
+        selectState: "राज्य निवडा",
+        selectDistrictCity: "जिल्हा / शहर निवडा",
+        sendOtp: "ओटीपी पाठवा",
+        verifyOtpRegister: "ओटीपी तपासा व नोंदणी करा",
+        resendOtp: "ओटीपी पुन्हा पाठवा",
+        mobileNumber: "मोबाईल नंबर",
+        selectRole: "भूमिका निवडा",
+        selectStatePrompt: "राज्य निवडा",
+        selectDistrictPrompt: "जिल्हा / शहर निवडा",
+        smsOtp: "एसएमएस ओटीपी",
+        whatsappOtp: "व्हॉट्सअॅप ओटीपी",
+        enterOtp: "6 अंकी ओटीपी टाका",
+        preferredLanguage: "पसंतीची भाषा",
+        farmer: "शेतकरी",
+        agriAdvisor: "कृषी सल्लागार",
+        mandiBuyer: "मंडी खरेदीदार",
+        todayCardSummary: "आज तुमच्या शेतासाठी महत्त्वाचे काम",
+        schemeSupportDesk: "सहाय्य नेव्हिगेटर",
+        postCommunity: "समुदायात पोस्ट करा",
+        searchCommunity: "समुदाय पोस्ट शोधा...",
+        refresh: "रिफ्रेश",
+        loading: "लोड होत आहे...",
+        welcomeBack: "पुन्हा स्वागत आहे",
+        verifiedGuidance: "पडताळलेले कृषी मार्गदर्शन",
+        trustedByFarmers: "शेतकऱ्यांचा विश्वास",
+        recordsDocumentsData: "नोंदी आणि अपलोड कागदपत्रांमधील माहिती",
+        otpFlowNote: "एसएमएस किंवा व्हॉट्सअॅप निवडा, फोनवर ओटीपी घ्या आणि पडताळणी करून खाते तयार करा.",
+        loggingIn: "लॉगिन सुरू आहे...",
+        sendingOtp: "ओटीपी पाठवला जात आहे...",
+        registering: "नोंदणी सुरू आहे...",
+        validMobileNumber: "कृपया योग्य 10 अंकी मोबाईल नंबर टाका",
+        otpResent: "ओटीपी पुन्हा पाठवला.",
+        otpSent: "ओटीपी पाठवला.",
+        otpInstruction: "फोन तपासा आणि 6 अंकी कोड टाका.",
+        unableToSendOtp: "सध्या ओटीपी पाठवता आला नाही.",
+        enterOtpPrompt: "फोनवर आलेला 6 अंकी ओटीपी टाका.",
+        homeDashboard: "होम डॅशबोर्ड",
+        homeHeroTitle: "आजच्या शेतीसाठी उत्तरे, सगळे एकाच ठिकाणी नाही.",
+        homeHeroSubtitle: "या होमपेजवर फक्त रोजच्या महत्त्वाच्या गोष्टी आहेत: चॅटबॉट, हवामान, स्मार्ट अलर्ट, मंडी भाव, एआय ब्रीफिंग आणि इतर पानांचे शॉर्टकट.",
+        askAgro: "AgroGyanGPT ला विचारा",
+        mainAiWorkspace: "मुख्य एआय कार्यक्षेत्र",
+        dailyHelpText: "ही वेबसाइटची मुख्य जागा आहे. पीक, हवामान, मंडी भाव, शेतीचे निर्णय किंवा सरकारी मदतीबद्दल विचारा.",
+        myFarmHeroTitle: "तुमच्या एआय उत्तरांमागचा शेत प्रोफाइल तयार करा.",
+        myFarmHeroSubtitle: "येथील माहिती वैयक्तिक सल्ला सुधारते. पीक, जमीन, माती, हंगाम, सिंचन आणि गाव सेट करा म्हणजे AgroGyanGPT अधिक योग्य मार्गदर्शन देईल.",
+        marketHeroTitle: "भाव, विक्री संकेत आणि व्यवसायिक निर्णय एकाच ठिकाणी.",
+        marketHeroSubtitle: "हे पान तुमची बाजाराशी संबंधित साधने एकत्र ठेवते. येथे मंडी भाव, अंदाज, नफा आणि जवळची कृषी सुविधा पाहा."
+    }
+};
+
+Object.keys(EXTRA_UI_TRANSLATIONS).forEach((lang) => {
+    UI_TRANSLATIONS[lang] = { ...(UI_TRANSLATIONS[lang] || {}), ...EXTRA_UI_TRANSLATIONS[lang] };
+});
+
+const EXACT_TEXT_TRANSLATIONS = {
+    Hindi: {
+        "Theme": "थीम",
+        "My Farm": "मेरा खेत",
+        "Crop Care": "फसल देखभाल",
+        "Market": "बाज़ार",
+        "Market Desk": "मार्केट डेस्क",
+        "Community": "समुदाय",
+        "Home": "मुख पृष्ठ",
+        "Schemes": "योजनाएँ",
+        "Profile": "प्रोफ़ाइल",
+        "Welcome back": "फिर से स्वागत है",
+        "Verified agricultural guidance": "सत्यापित कृषि मार्गदर्शन",
+        "Trusted by farmers": "किसानों द्वारा भरोसेमंद",
+        "Data from records and uploaded documents": "रिकॉर्ड और अपलोड दस्तावेज़ों से डेटा",
+        "Send OTP": "ओटीपी भेजें",
+        "Verify OTP & Register": "ओटीपी सत्यापित करें और पंजीकरण करें",
+        "Resend OTP": "ओटीपी फिर भेजें",
+        "Farmer": "किसान",
+        "Agri advisor": "कृषि सलाहकार",
+        "Mandi buyer": "मंडी खरीदार",
+        "SMS OTP": "एसएमएस ओटीपी",
+        "WhatsApp OTP": "व्हाट्सऐप ओटीपी",
+        "Select state": "राज्य चुनें",
+        "Select district / city": "ज़िला / शहर चुनें"
+    },
+    Marathi: {
+        "Theme": "थीम",
+        "My Farm": "माझे शेत",
+        "Crop Care": "पीक काळजी",
+        "Market": "बाजार",
+        "Market Desk": "मार्केट डेस्क",
+        "Community": "समुदाय",
+        "Home": "मुख्य",
+        "Schemes": "योजना",
+        "Profile": "प्रोफाइल",
+        "Welcome back": "पुन्हा स्वागत",
+        "Verified agricultural guidance": "पडताळलेले कृषी मार्गदर्शन",
+        "Trusted by farmers": "शेतकऱ्यांचा विश्वास",
+        "Data from records and uploaded documents": "नोंदी आणि अपलोड कागदपत्रांमधील माहिती",
+        "Send OTP": "ओटीपी पाठवा",
+        "Verify OTP & Register": "ओटीपी तपासा व नोंदणी करा",
+        "Resend OTP": "ओटीपी पुन्हा पाठवा",
+        "Farmer": "शेतकरी",
+        "Agri advisor": "कृषी सल्लागार",
+        "Mandi buyer": "मंडी खरेदीदार",
+        "SMS OTP": "एसएमएस ओटीपी",
+        "WhatsApp OTP": "व्हॉट्सअॅप ओटीपी",
+        "Select state": "राज्य निवडा",
+        "Select district / city": "जिल्हा / शहर निवडा"
+    }
+};
+
+function applyExactTextTranslations(lang) {
+    const replacements = EXACT_TEXT_TRANSLATIONS[lang];
+    if (!replacements) return;
+
+    document.querySelectorAll("button, a, span, p, h1, h2, h3, h4, label, option").forEach((el) => {
+        if (el.hasAttribute("data-i18n")) return;
+        if (el.children.length > 0) return;
+        const text = (el.textContent || "").trim();
+        if (replacements[text]) {
+            el.textContent = replacements[text];
+        }
+    });
+
+    document.querySelectorAll("input[placeholder], textarea[placeholder]").forEach((el) => {
+        const placeholder = el.getAttribute("placeholder");
+        if (replacements[placeholder]) {
+            el.setAttribute("placeholder", replacements[placeholder]);
+        }
+    });
+}
+
+function registerTranslations(extraTranslations) {
+    Object.entries(extraTranslations || {}).forEach(([lang, entries]) => {
+        UI_TRANSLATIONS[lang] = { ...(UI_TRANSLATIONS[lang] || {}), ...(entries || {}) };
+    });
+    applyTranslations();
+}
+
 // Expose helpers globally for other scripts
 window.getUILanguage = getUILanguage;
 window.setUILanguage = setUILanguage;
 window.t = t;
 window.initI18n = initI18n;
+window.registerTranslations = registerTranslations;
+
+window.addEventListener("storage", (event) => {
+    if (event.key === "uiLanguage") {
+        applyTranslations();
+    }
+});
+
+window.addEventListener("load", () => {
+    window.dispatchEvent(new CustomEvent("ui-language-changed", { detail: { lang: getUILanguage() } }));
+});

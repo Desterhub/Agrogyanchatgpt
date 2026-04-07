@@ -1,0 +1,120 @@
+<style>
+
+body{
+font-family:Arial, Helvetica, sans-serif;
+background:#eaf5ea;
+margin:0;
+}
+
+/* HEADER */
+
+.header{
+background:#1b5e20;
+color:white;
+padding:18px;
+text-align:center;
+font-size:22px;
+letter-spacing:1px;
+box-shadow:0px 3px 8px rgba(0,0,0,0.2);
+}
+
+/* MAIN CONTAINER */
+
+.container{
+width:700px;
+margin:auto;
+margin-top:30px;
+}
+
+/* POST BOX */
+
+.post-box{
+background:white;
+padding:18px;
+border-radius:12px;
+box-shadow:0px 4px 12px rgba(0,0,0,0.08);
+border-left:6px solid #2e7d32;
+}
+
+/* TEXTAREA */
+
+textarea{
+width:100%;
+height:90px;
+padding:12px;
+border-radius:8px;
+border:1px solid #c8e6c9;
+outline:none;
+font-size:14px;
+}
+
+/* POST BUTTON */
+
+button{
+background:#2e7d32;
+color:white;
+border:none;
+padding:9px 16px;
+border-radius:6px;
+cursor:pointer;
+margin-top:10px;
+font-weight:600;
+transition:0.2s;
+}
+
+button:hover{
+background:#1b5e20;
+}
+
+/* POST CARD */
+
+.post{
+background:white;
+margin-top:22px;
+padding:16px;
+border-radius:12px;
+box-shadow:0px 4px 10px rgba(0,0,0,0.08);
+border-left:6px solid #66bb6a;
+}
+
+/* TIMESTAMP */
+
+.timestamp{
+font-size:12px;
+color:#6b6b6b;
+margin-top:6px;
+}
+
+/* LIKE / DISLIKE BUTTONS */
+
+.actions button{
+background:#e8f5e9;
+color:#1b5e20;
+margin-right:6px;
+font-weight:600;
+}
+
+.actions button:hover{
+background:#c8e6c9;
+}
+
+/* COMMENT */
+
+.comment{
+background:#f1f8f2;
+padding:7px;
+margin-top:6px;
+border-radius:6px;
+font-size:14px;
+}
+
+/* REPLY INPUT */
+
+input{
+padding:7px;
+border-radius:6px;
+border:1px solid #c8e6c9;
+margin-top:8px;
+}
+
+</style>

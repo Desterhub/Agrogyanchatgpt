@@ -2,60 +2,136 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - AgroGyanGPT</title>
     <link rel="stylesheet" href="style.css">
+    <script defer src="ui.js"></script>
+    <script defer src="api-config.js"></script>
 </head>
-
 <body>
+<div class="page-shell">
+    <header class="top-bar">
+        <div class="brand-left">
+            <div class="brand-mark" data-i18n="appName">AgroGyanGPT</div>
+            <div id="welcomeUser" class="welcome-text"></div>
+        </div>
 
-<header class="top-bar">
-    <div class="brand-left" data-i18n="appName">🌱 AgroGyanGPT</div>
-    <div id="welcomeUser" class="welcome-text"></div>
+        <div class="top-actions">
+            <select id="uiLanguage" class="lang-select" aria-label="UI Language">
+                <option value="English">English</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Marathi">Marathi</option>
+            </select>
+            <button id="themeButton" class="nav-btn" onclick="toggleTheme()" type="button">Theme</button>
+            <button class="nav-btn" onclick="goHome()" data-i18n="home" type="button">Home</button>
+            <button class="nav-btn" onclick="goToMyFarm()" type="button">My Farm</button>
+            <button class="nav-btn" onclick="goToCropCare()" type="button">Crop Care</button>
+            <button class="nav-btn" onclick="goToMarket()" type="button">Market</button>
+            <button class="nav-btn" onclick="goToCommunity()" data-i18n="connectFarmers" type="button">Community</button>
+            <button class="nav-btn" onclick="goToSchemes()" data-i18n="schemes" type="button">Schemes</button>
+            <button class="nav-btn" onclick="logout()" data-i18n="logout" type="button">Logout</button>
+        </div>
+    </header>
 
-    <div class="top-actions">
-        <select id="uiLanguage" class="lang-select" aria-label="UI Language">
-            <option value="English">English</option>
-            <option value="Hindi">Hindi</option>
-            <option value="Marathi">Marathi</option>
-        </select>
-        <button id="themeButton" class="nav-btn" onclick="toggleTheme()">🌙</button>
-        <button class="nav-btn" onclick="goHome()" data-i18n="home">🏠 Home</button>
-        <button class="nav-btn" onclick="goToCommunity()" data-i18n="connectFarmers">👨‍🌾 Community</button>
-        <button class="nav-btn" onclick="goToSchemes()" data-i18n="schemes">🏛 Schemes</button>
-        <button class="nav-btn" onclick="logout()" data-i18n="logout">Logout</button>
-    </div>
-</header>
-
-<main class="community-container">
-    <section class="post-box" style="padding: 28px;">
-        <h1 style="margin-top:0;" data-i18n="yourProfile">Your Profile</h1>
-        <div class="profile-grid">
-            <div class="profile-card">
-                <h3 data-i18n="accountInfo">Account Info</h3>
-                <p><strong data-i18n="nameLabel">Name:</strong> <span id="profileName">-</span></p>
-                <p><strong data-i18n="emailLabel">Email:</strong> <span id="profileEmail">-</span></p>
-                <p><strong data-i18n="joinedLabel">Joined:</strong> <span id="profileJoinDate">-</span></p>
-            </div>
-            <div class="profile-card">
-                <h3 data-i18n="savedSchemes">Saved Schemes</h3>
-                <div id="savedSchemes" class="scheme-grid" style="margin-bottom:0;"></div>
-            </div>
-            <div class="profile-card" style="grid-column: 1 / -1;">
-                <h3 data-i18n="savedPosts">Saved Posts</h3>
-                <div id="savedPosts"></div>
-            </div>
-            <div class="profile-card" style="grid-column: 1 / -1;">
-                <h3 data-i18n="questionHistory">Question History</h3>
-                <div id="profileHistory"></div>
+    <section class="hero-panel">
+        <div class="hero-copy">
+            <p class="eyebrow">Farmer identity</p>
+            <h1 class="main-title" data-i18n="yourProfile">Your Profile</h1>
+            <p class="subtitle">A calm summary of your account, saved scheme shortlist, community memory, and question activity in the same premium theme as the rest of the app.</p>
+            <div class="profile-highlight">
+                <div class="stat-card">
+                    <span class="stat-label">Account</span>
+                    <span class="stat-value" id="profileNameBadge">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Saved schemes</span>
+                    <span class="stat-value" id="savedSchemeCount">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Question history</span>
+                    <span class="stat-value" id="historyCount">0</span>
+                </div>
             </div>
         </div>
+
+        <aside class="hero-side">
+            <div class="forecast-card">
+                <span class="meta-label">Account snapshot</span>
+                <div class="forecast-temp" id="profileJoinYear">2026</div>
+                <div style="font-size: 1.1rem; font-weight: 700;">Growing with AgroGyanGPT</div>
+                <p class="subnote" style="color: rgba(255, 244, 207, 0.78); margin-top: 10px;">Keep your favorite schemes and recent answers close for faster repeat decisions.</p>
+            </div>
+        </aside>
     </section>
-</main>
+
+    <main class="community-container">
+        <section class="post-box">
+            <div class="profile-grid">
+                <div class="profile-card">
+                    <h3 data-i18n="accountInfo">Account Info</h3>
+                    <p><strong data-i18n="nameLabel">Name:</strong> <span id="profileName">-</span></p>
+                    <p><strong data-i18n="emailLabel">Email:</strong> <span id="profileEmail">-</span></p>
+                    <p><strong>Mobile:</strong> <span id="profileMobile">-</span></p>
+                    <p><strong>Date of birth:</strong> <span id="profileDob">-</span></p>
+                    <p><strong>Location:</strong> <span id="profileLocation">-</span></p>
+                    <p><strong data-i18n="joinedLabel">Joined:</strong> <span id="profileJoinDate">-</span></p>
+                </div>
+
+                <div class="profile-card">
+                    <h3>Farmer Preferences</h3>
+                    <div class="form-grid">
+                        <input id="prefCrop" type="text" placeholder="Crop name">
+                        <input id="prefLand" type="text" placeholder="Land size">
+                        <input id="prefSoil" type="text" placeholder="Soil type">
+                        <input id="prefSeason" type="text" placeholder="Season">
+                        <input id="prefVillage" type="text" placeholder="Village">
+                        <input id="prefLang" type="text" placeholder="Preferred language">
+                    </div>
+                    <button class="primary-btn" type="button" onclick="savePreferences()">Save Preferences</button>
+                    <p id="prefMessage" class="small-note"></p>
+                </div>
+
+                <div class="profile-card">
+                    <h3>Farm Operating Profile</h3>
+                    <div class="form-grid">
+                        <input id="farmName" type="text" placeholder="Farm name">
+                        <input id="farmPrimaryCrop" type="text" placeholder="Primary crop">
+                        <input id="farmIrrigation" type="text" placeholder="Irrigation type">
+                        <input id="farmLivestock" type="text" placeholder="Livestock">
+                        <input id="farmTaluka" type="text" placeholder="Taluka">
+                        <input id="farmPinCode" type="text" placeholder="PIN code">
+                    </div>
+                    <button class="primary-btn" type="button" onclick="saveFarmProfile()">Save Farm Profile</button>
+                    <p id="farmMessage" class="small-note"></p>
+                </div>
+
+                <div class="profile-card">
+                    <h3 data-i18n="savedSchemes">Saved Schemes</h3>
+                    <div id="savedSchemes" class="scheme-grid"></div>
+                </div>
+
+                <div class="profile-card wide">
+                    <h3 data-i18n="savedPosts">Saved Posts</h3>
+                    <div id="savedPosts"></div>
+                </div>
+
+                <div class="profile-card wide">
+                    <h3 data-i18n="questionHistory">Question History</h3>
+                    <div id="profileHistory" class="history-list"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
 
 <script src="i18n.js"></script>
 <script>
 function getJoinedDate() {
-    return localStorage.getItem("joinDate") || "Unknown";
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+        return localStorage.getItem(`joinDate_${userId}`) || new Date().toISOString();
+    }
+    return localStorage.getItem("joinDate") || new Date().toISOString();
 }
 
 function getEmail() {
@@ -66,14 +142,67 @@ function getSavedSchemes() {
     return JSON.parse(localStorage.getItem("favoriteSchemes") || "[]");
 }
 
+function getMobile() {
+    return localStorage.getItem("userMobile") || "-";
+}
+
+function getDob() {
+    return localStorage.getItem("userDob") || "-";
+}
+
+function getLocation() {
+    const state = localStorage.getItem("userState") || "";
+    const district = localStorage.getItem("userDistrict") || "";
+    return [district, state].filter(Boolean).join(", ") || "-";
+}
+
+function getPreference(key, fallback = "") {
+    return localStorage.getItem(key) || fallback;
+}
+
 function getSavedPosts() {
     const userId = localStorage.getItem("userId");
     if (!userId) return [];
     return JSON.parse(localStorage.getItem(`myPosts_${userId}`) || "[]");
 }
 
+async function loadFarmProfile() {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
+
+    try {
+        const response = await fetch(`${window.AGRO_API_URL || "http://127.0.0.1:8000"}/farm-profile/${userId}`);
+        if (!response.ok) {
+            throw new Error(`farm profile fetch failed: ${response.status}`);
+        }
+        const data = await response.json();
+        const profile = data.farm_profile || {};
+        document.getElementById("farmName").value = profile.farm_name || "";
+        document.getElementById("farmPrimaryCrop").value = profile.primary_crop || localStorage.getItem("crop_name") || "";
+        document.getElementById("farmIrrigation").value = profile.irrigation_type || "";
+        document.getElementById("farmLivestock").value = profile.livestock || "";
+        document.getElementById("farmTaluka").value = profile.taluka || "";
+        document.getElementById("farmPinCode").value = profile.pin_code || "";
+    } catch (error) {
+        console.error("farm profile load error", error);
+    }
+}
+
 function getHistory() {
-    return JSON.parse(localStorage.getItem("agroHistory") || "[]");
+    if (typeof window.getPersonalHistory === "function") {
+        return window.getPersonalHistory();
+    }
+    const userId = localStorage.getItem("userId");
+    return JSON.parse(localStorage.getItem(userId ? `agroHistory_${userId}` : "agroHistory_guest") || "[]");
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }
 
 function renderSavedSchemes() {
@@ -81,14 +210,15 @@ function renderSavedSchemes() {
     const container = document.getElementById("savedSchemes");
 
     if (!container) return;
+    document.getElementById("savedSchemeCount").innerText = schemes.length;
     if (!schemes.length) {
-        container.innerHTML = `<p style='color: rgba(27,61,31,0.65);'>${t("noFavorites")}</p>`;
+        container.innerHTML = `<p class="small-note">${t("noFavorites")}</p>`;
         return;
     }
 
     container.innerHTML = schemes.map(name => `
-        <div class="scheme-card" style="padding: 12px;">
-            <h4 style="margin:0;">${name}</h4>
+        <div class="scheme-card" style="padding: 16px;">
+            <h3 style="margin:0;">${name}</h3>
         </div>
     `).join("");
 }
@@ -99,35 +229,147 @@ function renderSavedPosts() {
 
     if (!container) return;
     if (!posts.length) {
-        container.innerHTML = `<p style='color: rgba(27,61,31,0.65);'>${t("noPostsSaved")}</p>`;
+        container.innerHTML = `<p class="small-note">${t("noPostsSaved")}</p>`;
         return;
     }
 
     container.innerHTML = posts.map(p => `
-        <div class="comment" style="background: rgba(47,122,62,0.08); margin-bottom: 10px;">
+        <div class="comment">
             <div style="font-weight:600;">${new Date(p.ts).toLocaleString()}</div>
             <div>${p.content}</div>
         </div>
     `).join("");
 }
 
-function renderHistory() {
-    const history = getHistory();
+async function renderHistory() {
     const container = document.getElementById("profileHistory");
+    const userId = localStorage.getItem("userId");
 
     if (!container) return;
+
+    container.innerHTML = `<p class="small-note">Loading your question history...</p>`;
+
+    if (userId) {
+        try {
+            const response = await fetch(`${window.AGRO_API_URL || "http://127.0.0.1:8000"}/profile/${userId}`);
+            if (!response.ok) {
+                throw new Error(`profile fetch failed: ${response.status}`);
+            }
+            const data = await response.json();
+            const history = data.memory || [];
+            document.getElementById("historyCount").innerText = history.length;
+            if (!history.length) {
+                container.innerHTML = `<p class="small-note">${t("noQuestions")}</p>`;
+                return;
+            }
+
+            container.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <h4>${escapeHtml(item.question)}</h4>
+                    <p>${escapeHtml(item.answer)}</p>
+                    <small>${new Date(item.timestamp).toLocaleString()}</small>
+                </div>
+            `).join("");
+            return;
+        } catch (error) {
+            console.error("profile history error", error);
+        }
+    }
+
+    const history = getHistory();
+    document.getElementById("historyCount").innerText = history.length;
     if (!history.length) {
-        container.innerHTML = `<p style='color: rgba(27,61,31,0.65);'>${t("noQuestions")}</p>`;
+        container.innerHTML = `<p class="small-note">${t("noQuestions")}</p>`;
         return;
     }
 
     container.innerHTML = history.slice(0, 10).map(item => `
         <div class="history-item">
-            <h4>${item.question}</h4>
-            <p>${item.answer}</p>
+            <h4>${escapeHtml(item.question)}</h4>
+            <p>${escapeHtml(item.answer)}</p>
             <small>${new Date(item.ts).toLocaleString()}</small>
         </div>
     `).join("");
+}
+
+function setTheme(theme) {
+    document.body.classList.toggle("dark-mode", theme === "dark");
+    localStorage.setItem("theme", theme);
+    const themeButton = document.getElementById("themeButton");
+    if (themeButton) {
+        themeButton.innerText = theme === "dark" ? t("light") : t("dark");
+    }
+}
+
+async function savePreferences() {
+    const userId = parseInt(localStorage.getItem("userId") || "0", 10);
+    const payload = {
+        user_id: userId,
+        crop_name: document.getElementById("prefCrop").value.trim(),
+        land_size: document.getElementById("prefLand").value.trim(),
+        soil_type: document.getElementById("prefSoil").value.trim(),
+        season: document.getElementById("prefSeason").value.trim(),
+        village: document.getElementById("prefVillage").value.trim(),
+        preferred_language: document.getElementById("prefLang").value.trim()
+    };
+
+    try {
+        const response = await fetch(`${window.AGRO_API_URL || "http://127.0.0.1:8000"}/profile/preferences`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (data.profile) {
+            localStorage.setItem("crop_name", data.profile.crop_name || "");
+            localStorage.setItem("land_size", data.profile.land_size || "");
+            localStorage.setItem("soil_type", data.profile.soil_type || "");
+            localStorage.setItem("season", data.profile.season || "");
+            localStorage.setItem("village", data.profile.village || "");
+            localStorage.setItem("preferred_language", data.profile.preferred_language || "");
+            document.getElementById("prefMessage").innerText = "Preferences saved.";
+        }
+    } catch (error) {
+        document.getElementById("prefMessage").innerText = "Unable to save preferences right now.";
+    }
+}
+
+async function saveFarmProfile() {
+    const userId = parseInt(localStorage.getItem("userId") || "0", 10);
+    const payload = {
+        user_id: userId,
+        farm_name: document.getElementById("farmName").value.trim(),
+        primary_crop: document.getElementById("farmPrimaryCrop").value.trim(),
+        irrigation_type: document.getElementById("farmIrrigation").value.trim(),
+        livestock: document.getElementById("farmLivestock").value.trim(),
+        taluka: document.getElementById("farmTaluka").value.trim(),
+        pin_code: document.getElementById("farmPinCode").value.trim()
+    };
+
+    try {
+        const response = await fetch(`${window.AGRO_API_URL || "http://127.0.0.1:8000"}/farm-profile`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (data.farm_profile) {
+            if (payload.primary_crop) {
+                localStorage.setItem("crop_name", payload.primary_crop);
+                document.getElementById("prefCrop").value = payload.primary_crop;
+            }
+            document.getElementById("farmMessage").innerText = "Farm profile saved.";
+        } else {
+            document.getElementById("farmMessage").innerText = data.message || "Unable to save farm profile right now.";
+        }
+    } catch (error) {
+        document.getElementById("farmMessage").innerText = "Unable to save farm profile right now.";
+    }
+}
+
+function toggleTheme() {
+    const current = document.body.classList.contains("dark-mode") ? "dark" : "light";
+    setTheme(current === "dark" ? "light" : "dark");
 }
 
 function initProfile() {
@@ -135,15 +377,30 @@ function initProfile() {
         initI18n();
     }
 
+    setTheme(localStorage.getItem("theme") || "light");
+
     const user = localStorage.getItem("user");
     if (!user) {
         window.location.href = "login.html";
         return;
     }
 
+    const joinedDate = new Date(getJoinedDate());
+
     document.getElementById("profileName").innerText = user;
     document.getElementById("profileEmail").innerText = getEmail();
-    document.getElementById("profileJoinDate").innerText = new Date(getJoinedDate()).toLocaleDateString();
+    document.getElementById("profileMobile").innerText = getMobile();
+    document.getElementById("profileDob").innerText = getDob() !== "-" ? new Date(getDob()).toLocaleDateString() : "-";
+    document.getElementById("profileLocation").innerText = getLocation();
+    document.getElementById("profileJoinDate").innerText = joinedDate.toLocaleDateString();
+    document.getElementById("profileNameBadge").innerText = user;
+    document.getElementById("profileJoinYear").innerText = joinedDate.getFullYear();
+    document.getElementById("prefCrop").value = getPreference("crop_name", "Wheat");
+    document.getElementById("prefLand").value = getPreference("land_size", "3 acres");
+    document.getElementById("prefSoil").value = getPreference("soil_type", "Loamy");
+    document.getElementById("prefSeason").value = getPreference("season", "Rabi");
+    document.getElementById("prefVillage").value = getPreference("village", "");
+    document.getElementById("prefLang").value = getPreference("preferred_language", "English");
 
     const welcomeUser = document.getElementById("welcomeUser");
     if (welcomeUser) {
@@ -153,6 +410,7 @@ function initProfile() {
     renderSavedSchemes();
     renderSavedPosts();
     renderHistory();
+    loadFarmProfile();
 }
 
 function goHome() {
@@ -163,12 +421,20 @@ function goToCommunity() {
     window.location.href = "community.html";
 }
 
-function goToSchemes() {
-    window.location.href = "schemes.html";
+function goToMyFarm() {
+    window.location.href = "my-farm.html";
 }
 
-function goToProfile() {
-    window.location.href = "profile.html";
+function goToCropCare() {
+    window.location.href = "crop-care.html";
+}
+
+function goToMarket() {
+    window.location.href = "market.html";
+}
+
+function goToSchemes() {
+    window.location.href = "schemes.html";
 }
 
 function logout() {
@@ -181,6 +447,5 @@ function logout() {
 
 initProfile();
 </script>
-
 </body>
 </html>

@@ -1,18 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - AgroGyanGPT</title>
   <link rel="stylesheet" href="style.css">
+  <script defer src="ui.js"></script>
+  <script defer src="api-config.js"></script>
 </head>
-
-<body>
-
+<body class="login-page">
+<div id="loginIntro" class="login-intro" aria-hidden="true">
+    <div class="intro-film-grain"></div>
+    <div class="intro-vignette"></div>
+    <div class="intro-grid"></div>
+    <div class="intro-scene intro-scene-a">
+        <video class="intro-video" muted playsinline loop preload="none">
+            <source src="https://videos.pexels.com/video-files/32163823/13714989_1920_1080_30fps.mp4" type="video/mp4">
+        </video>
+        <div class="intro-scene-overlay"></div>
+    </div>
+    <div class="intro-scene intro-scene-b">
+        <video class="intro-video" muted playsinline loop preload="none">
+            <source src="https://videos.pexels.com/video-files/10901539/10901539-hd_2560_1440_25fps.mp4" type="video/mp4">
+        </video>
+        <div class="intro-scene-overlay"></div>
+    </div>
+    <div class="intro-scene intro-scene-c">
+        <video class="intro-video" muted playsinline loop preload="none">
+            <source src="https://videos.pexels.com/video-files/14319118/14319118-uhd_2560_1440_60fps.mp4" type="video/mp4">
+        </video>
+        <div class="intro-scene-overlay"></div>
+    </div>
+    <div class="intro-copy intro-copy-a">
+        <p class="intro-kicker">AgroGyanGPT</p>
+        <h2>From the field to first access.</h2>
+        <p>Real farm moments, framed like a premium welcome instead of a basic login screen.</p>
+    </div>
+    <div class="intro-copy intro-copy-b">
+        <p class="intro-kicker">Weather. Crops. Schemes.</p>
+        <h2>Practical intelligence for farmers who need answers fast.</h2>
+        <p>One place for multilingual support, local context, and everyday agricultural decisions.</p>
+    </div>
+    <div class="intro-copy intro-copy-c">
+        <p class="intro-kicker">Ready To Begin</p>
+        <h2>Sign in. Register. Step into AgroGyanGPT.</h2>
+        <p>Built to feel grounded, modern, and useful from the very first screen.</p>
+    </div>
+    <div class="intro-bottom-bar">
+        <span class="intro-line"></span>
+        <span class="intro-line"></span>
+        <span class="intro-line"></span>
+    </div>
+    <button id="skipIntroButton" class="intro-skip" type="button" data-i18n="tourSkip">Skip intro</button>
+</div>
 <div class="login-wrapper">
-
   <div class="login-card">
+      <div class="login-header">
+          <p class="eyebrow" data-i18n="welcomeBack">Welcome back</p>
+          <h1 class="login-brand" data-i18n="appName">AgroGyanGPT</h1>
+          <p class="login-subtitle" data-i18n="loginSubtitle">Secure Access Portal</p>
+      </div>
 
-      <h1 class="login-brand" data-i18n="appName">🌱 AgroGyanGPT</h1>
-      <p class="login-subtitle" data-i18n="loginSubtitle">Secure Access Portal</p>
       <select id="uiLanguage" class="lang-select" aria-label="UI Language">
           <option value="English">English</option>
           <option value="Hindi">Hindi</option>
@@ -20,10 +68,10 @@
       </select>
 
       <label class="visually-hidden" for="email">Email address</label>
-      <input id="email" type="email" data-i18n-placeholder="emailPlaceholder" placeholder="Email Address" autocomplete="email" />
+      <input id="email" type="email" data-i18n-placeholder="emailPlaceholder" placeholder="Email Address" autocomplete="email">
 
       <label class="visually-hidden" for="password">Password</label>
-      <input id="password" type="password" data-i18n-placeholder="passwordPlaceholder" placeholder="Password" autocomplete="current-password" />
+      <input id="password" type="password" data-i18n-placeholder="passwordPlaceholder" placeholder="Password" autocomplete="current-password">
 
       <button id="loginButton" class="login-btn-green" onclick="login()" type="button">
           <span class="btn-text" data-i18n="login">Login</span>
@@ -36,29 +84,94 @@
       </p>
 
       <p id="authMessage" role="alert" aria-live="polite"></p>
-
   </div>
-
 </div>
 
-<!-- Registration modal -->
+<div class="trust-strip">
+    <span data-i18n="verifiedGuidance">Verified agricultural guidance</span>
+    <span data-i18n="trustedByFarmers">Trusted by farmers</span>
+    <span data-i18n="recordsDocumentsData">Data from records and uploaded documents</span>
+</div>
+
 <div id="registerModal" class="modal-overlay hidden">
     <div class="modal-card">
-        <h2 data-i18n="registerTitle">Create an account</h2>
-        <label class="visually-hidden" for="regName">Full name</label>
-        <input id="regName" type="text" data-i18n-placeholder="fullNamePlaceholder" placeholder="Full name" autocomplete="name" />
-        <label class="visually-hidden" for="regEmail">Email address</label>
-        <input id="regEmail" type="email" data-i18n-placeholder="emailPlaceholder" placeholder="Email address" autocomplete="email" />
+        <h2 class="panel-title" data-i18n="registerTitle">Create an account</h2>
+        <div class="form-grid">
+            <div>
+                <label class="visually-hidden" for="regName">Full name</label>
+                <input id="regName" type="text" data-i18n-placeholder="fullNamePlaceholder" placeholder="Full name" autocomplete="name">
+            </div>
+            <div>
+                <label class="visually-hidden" for="regEmail">Email address</label>
+                <input id="regEmail" type="email" data-i18n-placeholder="emailPlaceholder" placeholder="Email address" autocomplete="email">
+            </div>
+            <div>
+                <label class="visually-hidden" for="regMobile">Mobile number</label>
+                <input id="regMobile" type="tel" data-i18n-placeholder="mobileNumber" placeholder="Mobile number" autocomplete="tel" maxlength="10">
+            </div>
+            <div>
+                <label class="visually-hidden" for="regDob">Date of birth</label>
+                <input id="regDob" type="date" max="2026-12-31" autocomplete="bday">
+            </div>
+            <div>
+                <label class="visually-hidden" for="regState">State</label>
+                <select id="regState" aria-label="State">
+                    <option value="" data-i18n="selectState">Select state</option>
+                </select>
+            </div>
+            <div>
+                <label class="visually-hidden" for="regDistrict">District or city</label>
+                <select id="regDistrict" aria-label="District or city" disabled>
+                    <option value="" data-i18n="selectDistrictCity">Select district / city</option>
+                </select>
+            </div>
+            <div>
+                <label class="visually-hidden" for="regRole">Role</label>
+                <select id="regRole" aria-label="Role">
+                    <option value="farmer" data-i18n="farmer">Farmer</option>
+                    <option value="advisor" data-i18n="agriAdvisor">Agri advisor</option>
+                    <option value="buyer" data-i18n="mandiBuyer">Mandi buyer</option>
+                </select>
+            </div>
+            <div>
+                <label class="visually-hidden" for="regPreferredLanguage">Preferred language</label>
+                <select id="regPreferredLanguage" aria-label="Preferred language">
+                    <option value="English">English</option>
+                    <option value="Hindi">Hindi</option>
+                    <option value="Marathi">Marathi</option>
+                </select>
+            </div>
+            <div>
+                <label class="visually-hidden" for="regOtpChannel">OTP channel</label>
+                <select id="regOtpChannel" aria-label="OTP channel">
+                    <option value="sms" data-i18n="smsOtp">SMS OTP</option>
+                    <option value="whatsapp" data-i18n="whatsappOtp">WhatsApp OTP</option>
+                </select>
+            </div>
+            <div>
+                <label class="visually-hidden" for="regOtp">OTP</label>
+                <input id="regOtp" type="text" data-i18n-placeholder="enterOtp" placeholder="Enter 6-digit OTP" inputmode="numeric" maxlength="6">
+            </div>
+        </div>
         <label class="visually-hidden" for="regPassword">Password</label>
-        <input id="regPassword" type="password" data-i18n-placeholder="passwordPlaceholder" placeholder="Password (min 6 chars)" autocomplete="new-password" />
-        <button id="registerButton" class="login-btn-green" onclick="registerUser()" type="button">
-            <span class="btn-text" data-i18n="register">Register</span>
-            <span class="btn-spinner hidden" aria-hidden="true"></span>
-        </button>
-        <p style="margin-top: 12px; font-size: 14px;">
-            <span data-i18n="hasAccountPrompt">Already have an account?</span> <a href="#" class="register-link" onclick="hideRegisterModal(); return false;" data-i18n="backToLogin">Back to login</a>
+        <input id="regPassword" type="password" data-i18n-placeholder="passwordPlaceholder" placeholder="Password (min 6 chars)" autocomplete="new-password">
+        <div class="form-grid">
+            <button id="sendOtpButton" class="login-btn-green" onclick="sendRegistrationOtp()" type="button">
+                <span class="btn-text" data-i18n="sendOtp">Send OTP</span>
+                <span class="btn-spinner hidden" aria-hidden="true"></span>
+            </button>
+            <button id="registerButton" class="login-btn-green" onclick="registerUser()" type="button">
+                <span class="btn-text" data-i18n="verifyOtpRegister">Verify OTP & Register</span>
+                <span class="btn-spinner hidden" aria-hidden="true"></span>
+            </button>
+        </div>
+        <p class="small-note" data-i18n="otpFlowNote">Choose SMS or WhatsApp, receive OTP on your phone, then verify to create the account.</p>
+        <button id="resendOtpButton" class="nav-btn" onclick="sendRegistrationOtp(true)" type="button" data-i18n="resendOtp">Resend OTP</button>
+        <p class="login-switch">
+            <span data-i18n="hasAccountPrompt">Already have an account?</span>
+            <a href="#" class="register-link" onclick="hideRegisterModal(); return false;" data-i18n="backToLogin">Back to login</a>
         </p>
-        <p id="registerMessage" role="alert" aria-live="polite" style="margin-top: 8px; font-size: 14px;"></p>
+        <p id="registerMessage" role="alert" aria-live="polite"></p>
     </div>
 </div>
 

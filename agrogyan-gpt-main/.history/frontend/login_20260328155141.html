@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - AgroGyanGPT</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="ui.js"></script>
+</head>
+<body class="login-page">
+<div class="login-wrapper">
+  <div class="login-card">
+      <div class="login-header">
+          <p class="eyebrow">Welcome back</p>
+          <h1 class="login-brand" data-i18n="appName">AgroGyanGPT</h1>
+          <p class="login-subtitle" data-i18n="loginSubtitle">Secure Access Portal</p>
+      </div>
+
+      <select id="uiLanguage" class="lang-select" aria-label="UI Language">
+          <option value="English">English</option>
+          <option value="Hindi">Hindi</option>
+          <option value="Marathi">Marathi</option>
+      </select>
+
+      <label class="visually-hidden" for="email">Email address</label>
+      <input id="email" type="email" data-i18n-placeholder="emailPlaceholder" placeholder="Email Address" autocomplete="email">
+
+      <label class="visually-hidden" for="password">Password</label>
+      <input id="password" type="password" data-i18n-placeholder="passwordPlaceholder" placeholder="Password" autocomplete="current-password">
+
+      <button id="loginButton" class="login-btn-green" onclick="login()" type="button">
+          <span class="btn-text" data-i18n="login">Login</span>
+          <span class="btn-spinner hidden" aria-hidden="true"></span>
+      </button>
+
+      <p class="login-switch">
+          <span data-i18n="notRegisteredPrompt">Not registered?</span>
+          <a href="#" class="register-link" onclick="showRegisterModal(); return false;" data-i18n="registerHere">Register here</a>
+      </p>
+
+      <p id="authMessage" role="alert" aria-live="polite"></p>
+  </div>
+</div>
+
+<div class="trust-strip">
+    <span>Verified agricultural guidance</span>
+    <span>Trusted by farmers</span>
+    <span>Data from records and uploaded documents</span>
+</div>
+
+<div id="registerModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <h2 class="panel-title" data-i18n="registerTitle">Create an account</h2>
+        <div class="form-grid">
+            <div>
+                <label class="visually-hidden" for="regName">Full name</label>
+                <input id="regName" type="text" data-i18n-placeholder="fullNamePlaceholder" placeholder="Full name" autocomplete="name">
+            </div>
+            <div>
+                <label class="visually-hidden" for="regEmail">Email address</label>
+                <input id="regEmail" type="email" data-i18n-placeholder="emailPlaceholder" placeholder="Email address" autocomplete="email">
+            </div>
+            <div>
+                <label class="visually-hidden" for="regMobile">Mobile number</label>
+                <input id="regMobile" type="tel" placeholder="Mobile number" autocomplete="tel" maxlength="10">
+            </div>
+            <div>
+                <label class="visually-hidden" for="regDob">Date of birth</label>
+                <input id="regDob" type="date" max="2026-12-31" autocomplete="bday">
+            </div>
+            <div>
+                <label class="visually-hidden" for="regState">State</label>
+                <select id="regState" aria-label="State">
+                    <option value="">Select state</option>
+                </select>
+            </div>
+            <div>
+                <label class="visually-hidden" for="regDistrict">District or city</label>
+                <select id="regDistrict" aria-label="District or city" disabled>
+                    <option value="">Select district / city</option>
+                </select>
+            </div>
+        </div>
+he     <label class="visually-hidden" for="regPassword">Password</label>
+        <input id="regPassword" type="password" data-i18n-placeholder="passwordPlaceholder" placeholder="Password (min 6 chars)" autocomplete="new-password">
+        <button id="registerButton" class="login-btn-green" onclick="registerUser()" type="button">
+            <span class="btn-text" data-i18n="register">Register</span>
+            <span class="btn-spinner hidden" aria-hidden="true"></span>
+        </button>
+        <p class="login-switch">
+            <span data-i18n="hasAccountPrompt">Already have an account?</span>
+            <a href="#" class="register-link" onclick="hideRegisterModal(); return false;" data-i18n="backToLogin">Back to login</a>
+        </p>
+        <p id="registerMessage" role="alert" aria-live="polite"></p>
+    </div>
+</div>
+
+<script defer src="i18n.js"></script>
+<script src="auth.js"></script>
+<script>
+    if (typeof initI18n === "function") {
+        initI18n();
+    }
+</script>
+</body>
+</html>

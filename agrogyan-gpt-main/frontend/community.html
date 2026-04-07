@@ -1,258 +1,131 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Farmer Community</title>
     <link rel="stylesheet" href="style.css">
+    <script defer src="ui.js"></script>
+    <script defer src="api-config.js"></script>
     <script defer src="i18n.js"></script>
-    <style>
-        /* Community page tweaks (extends base styles in style.css) */
-        .community-container {
-            max-width: 860px;
-            margin: 26px auto 64px;
-            padding: 0 16px;
-        }
-
-        .post-box {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .post-box:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
-        }
-
-        .post-card {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 18px;
-            border-radius: 18px;
-            margin-bottom: 18px;
-            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(47, 122, 62, 0.12);
-            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-            /* Ensure posts are visible even if animations are disabled */
-            opacity: 1;
-            animation: fadeInUp 0.34s forwards;
-        }
-
-        .post-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.15);
-        }
-
-        .post-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 14px;
-        }
-
-        .post-meta {
-            font-size: 13px;
-            color: #536e55;
-            white-space: nowrap;
-        }
-
-        .post-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 16px;
-        }
-
-        .post-actions button {
-            background: rgba(47, 122, 62, 0.1);
-            border: 1px solid rgba(47, 122, 62, 0.25);
-            color: #2f7a3e;
-            padding: 8px 14px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
-
-        .post-actions button:hover {
-            background: rgba(47, 122, 62, 0.18);
-            transform: translateY(-1px);
-        }
-
-        .comment {
-            background: rgba(47, 122, 62, 0.08);
-            border: 1px solid rgba(47, 122, 62, 0.12);
-            padding: 10px 12px;
-            border-radius: 12px;
-            margin-top: 10px;
-        }
-
-        /* loading skeleton */
-        .skeleton {
-            position: relative;
-            overflow: hidden;
-            opacity: 0.9;
-        }
-
-        .skeleton::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -120%;
-            width: 120%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-            animation: shimmer 1.3s infinite;
-        }
-
-        .skeleton-line {
-            background: rgba(230, 230, 230, 0.9);
-            border-radius: 10px;
-            height: 14px;
-            margin-bottom: 10px;
-        }
-
-        .skeleton-title {
-            width: 60%;
-            height: 18px;
-        }
-
-        .skeleton-meta {
-            width: 35%;
-            height: 12px;
-        }
-
-        .skeleton-text {
-            width: 100%;
-        }
-
-        .skeleton-action {
-            width: 52%;
-            height: 32px;
-        }
-
-        @keyframes shimmer {
-            from {
-                transform: translateX(-120%);
-            }
-            to {
-                transform: translateX(120%);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 640px) {
-            .top-bar {
-                flex-wrap: wrap;
-                gap: 10px;
-                justify-content: center;
-            }
-
-            .top-actions {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .community-container {
-                padding: 0 14px;
-            }
-
-            .post-card {
-                padding: 14px;
-            }
-
-            .post-actions {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .post-actions button {
-                width: 100%;
-            }
-        }
-    </style>
 </head>
-
 <body>
+<div class="page-shell">
+    <header class="top-bar">
+        <div class="brand-left">
+            <div class="brand-mark" data-i18n="communityTitle">Farmer Community</div>
+            <div id="welcomeUser" class="welcome-text"></div>
+        </div>
 
-<header class="top-bar">
-    <div class="brand-left" data-i18n="communityTitle">🌾 Farmer Community</div>
-    <div id="welcomeUser" class="welcome-text"></div>
+        <div class="top-actions">
+            <select id="uiLanguage" class="lang-select" aria-label="UI Language">
+                <option value="English">English</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Marathi">Marathi</option>
+            </select>
+            <button id="themeButton" class="nav-btn" onclick="toggleTheme()" type="button">Theme</button>
+            <button class="nav-btn" onclick="goHome()" data-i18n="home" type="button">Home</button>
+            <button class="nav-btn" onclick="goToMyFarm()" type="button">My Farm</button>
+            <button class="nav-btn" onclick="goToCropCare()" type="button">Crop Care</button>
+            <button class="nav-btn" onclick="goToMarket()" type="button">Market</button>
+            <button class="nav-btn" onclick="goToSchemes()" data-i18n="schemes" type="button">Schemes</button>
+            <button class="nav-btn" onclick="goToProfile()" data-i18n="profile" type="button">Profile</button>
+            <button id="authButton" class="nav-btn" type="button"></button>
+        </div>
+    </header>
 
-    <div class="top-actions">
-        <select id="uiLanguage" class="lang-select" aria-label="UI Language">
-            <option value="English">English</option>
-            <option value="Hindi">Hindi</option>
-            <option value="Marathi">Marathi</option>
-        </select>
-        <button id="themeButton" class="nav-btn" onclick="toggleTheme()">🌙</button>
-        <button class="nav-btn" onclick="goHome()" data-i18n="home">Home</button>
-        <button class="nav-btn" onclick="goToSchemes()" data-i18n="schemes">🏛 Schemes</button>
-        <button class="nav-btn" onclick="goToProfile()" data-i18n="profile">👤 Profile</button>
-        <button id="authButton" class="nav-btn"></button>
-    </div>
-</header>
+    <section class="hero-panel">
+        <div class="hero-copy">
+            <p class="eyebrow">Grow together</p>
+            <h1 class="main-title">Farmer Community</h1>
+            <p class="subtitle">Share field observations, ask for crop advice, react to others, and keep practical farming conversations moving in a calmer, cleaner space.</p>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <span class="stat-label">Post style</span>
+                    <span class="stat-value">Quick updates</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Best for</span>
+                    <span class="stat-value">Peer support</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Flow</span>
+                    <span class="stat-value">Searchable</span>
+                </div>
+            </div>
+        </div>
 
-<div id="toast" class="toast" role="status" aria-live="polite"></div>
+        <aside class="hero-side">
+            <div class="forecast-card">
+                <span class="meta-label">Community energy</span>
+                <div class="forecast-temp">Live</div>
+                <div style="font-size: 1.1rem; font-weight: 700;">Ask, react, reply</div>
+                <p class="subnote" style="color: rgba(255, 244, 207, 0.78); margin-top: 10px;">Use this page for practical field experience while the dashboard handles document answers.</p>
+            </div>
+        </aside>
+    </section>
 
-<div id="tourOverlay" class="tour-overlay hidden">
-    <div class="tour-card">
-        <div class="tour-step" id="tourStep">
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <div id="tourOverlay" class="tour-overlay hidden">
+        <div class="tour-card">
             <h3 id="tourTitle" data-i18n="tourWelcome">Welcome!</h3>
             <p id="tourText" data-i18n="tourText">Let's walk through the community features.</p>
             <div class="tour-buttons">
-                <button id="tourNext" class="primary-btn" data-i18n="tourNext">Next</button>
-                <button id="tourSkip" class="nav-btn" data-i18n="tourSkip">Skip</button>
+                <button id="tourNext" class="primary-btn" data-i18n="tourNext" type="button">Next</button>
+                <button id="tourSkip" class="nav-btn" data-i18n="tourSkip" type="button">Skip</button>
             </div>
         </div>
     </div>
+
+    <main class="community-container">
+        <section class="post-box">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">New conversation</p>
+                    <h2 class="section-title">Post to the community</h2>
+                </div>
+            </div>
+            <textarea id="postContent" data-i18n-placeholder="communityPostPlaceholder" placeholder="Ask something to the community..."></textarea>
+            <button class="primary-btn" onclick="createPost()" data-i18n="communityPostButton" type="button">Post</button>
+        </section>
+
+        <section class="post-box">
+            <div class="search-bar">
+                <input id="postSearch" data-i18n-placeholder="communitySearchPlaceholder" placeholder="Search community posts...">
+                <button class="primary-btn" onclick="searchPosts()" data-i18n="communitySearchButton" type="button">Search</button>
+            </div>
+            <div id="communityStatus" class="small-note" style="margin-top: 14px;"></div>
+        </section>
+
+        <div id="postsContainer"></div>
+
+        <div id="loadMoreWrapper" style="text-align: center;">
+            <button id="loadMoreBtn" class="primary-btn" onclick="loadMorePosts()" data-i18n="communityLoadMore" type="button">Load more</button>
+        </div>
+    </main>
 </div>
 
-<main class="community-container">
-    <section class="post-box">
-        <textarea id="postContent" data-i18n-placeholder="communityPostPlaceholder" placeholder="Ask something to the community..."></textarea>
-        <button class="primary-btn" onclick="createPost()" data-i18n="communityPostButton">Post</button>
-    </section>
-
-    <section class="search-bar" style="margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-        <input id="postSearch" data-i18n-placeholder="communitySearchPlaceholder" placeholder="Search community posts..." style="flex:1; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.18);" />
-        <button class="primary-btn" onclick="searchPosts()" data-i18n="communitySearchButton">Search</button>
-    </section>
-
-    <div id="communityStatus" style="margin: 12px 0; color: #2f7a3e; font-weight: 600;"></div>
-
-    <div id="postsContainer"></div>
-
-    <div id="loadMoreWrapper" style="text-align:center; margin-top: 18px;">
-        <button id="loadMoreBtn" class="primary-btn" onclick="loadMorePosts()" data-i18n="communityLoadMore">Load more</button>
-    </div>
-</main>
-
 <div class="mobile-actions">
-    <button class="nav-btn" onclick="createPost()" data-i18n="communityNewPost">+ New post</button>
-    <button class="nav-btn" onclick="loadPosts({ reset: true })" data-i18n="communityRefresh">↻ Refresh</button>
+    <button class="nav-btn" onclick="createPost()" data-i18n="communityNewPost" type="button">+ New post</button>
+    <button class="nav-btn" onclick="loadPosts({ reset: true })" data-i18n="communityRefresh" type="button">Refresh</button>
 </div>
 
 <script>
-const API = "http://127.0.0.1:8000";
+const API = window.AGRO_API_URL || "http://127.0.0.1:8000";
 const PAGE_SIZE = 6;
 
 let postOffset = 0;
 let currentSearch = "";
 let currentUserId = null;
+let tourStepIndex = 0;
 
 function setTheme(theme) {
     document.body.classList.toggle("dark-mode", theme === "dark");
     localStorage.setItem("theme", theme);
     const themeButton = document.getElementById("themeButton");
     if (themeButton) {
-        themeButton.innerText = theme === "dark" ? "☀️" : "🌙";
+        themeButton.innerText = theme === "dark" ? t("light") : t("dark");
     }
 }
 
@@ -276,32 +149,17 @@ function showToast(message, type = "success", duration = 3200) {
 
 function getTourSteps() {
     return [
-        {
-            titleKey: "tourStep1Title",
-            textKey: "tourStep1Text",
-        },
-        {
-            titleKey: "tourStep2Title",
-            textKey: "tourStep2Text",
-        },
-        {
-            titleKey: "tourStep3Title",
-            textKey: "tourStep3Text",
-        },
-        {
-            titleKey: "tourStep4Title",
-            textKey: "tourStep4Text",
-        },
+        { titleKey: "tourStep1Title", textKey: "tourStep1Text" },
+        { titleKey: "tourStep2Title", textKey: "tourStep2Text" },
+        { titleKey: "tourStep3Title", textKey: "tourStep3Text" },
+        { titleKey: "tourStep4Title", textKey: "tourStep4Text" }
     ];
 }
-
-let tourStepIndex = 0;
 
 function showTourStep(index) {
     const overlay = document.getElementById("tourOverlay");
     const title = document.getElementById("tourTitle");
     const text = document.getElementById("tourText");
-
     if (!overlay || !title || !text) return;
 
     const step = getTourSteps()[index];
@@ -317,8 +175,7 @@ function showTourStep(index) {
 
 function nextTourStep() {
     tourStepIndex += 1;
-    const steps = getTourSteps();
-    if (tourStepIndex >= steps.length) {
+    if (tourStepIndex >= getTourSteps().length) {
         endTour();
         return;
     }
@@ -343,25 +200,17 @@ function showLoadingSkeleton(count = 3) {
     const container = document.getElementById("postsContainer");
     container.innerHTML = "";
 
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < count; i += 1) {
         const card = document.createElement("div");
         card.className = "post-card skeleton";
         card.innerHTML = `
             <div class="skeleton-line skeleton-title"></div>
             <div class="skeleton-line skeleton-meta"></div>
-            <div class="skeleton-line skeleton-text"></div>
-            <div class="skeleton-line skeleton-text"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
             <div class="skeleton-line skeleton-action"></div>
         `;
         container.appendChild(card);
-    }
-}
-
-function scrollToLatestPost() {
-    const container = document.getElementById("postsContainer");
-    const first = container.firstElementChild;
-    if (first) {
-        first.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 }
 
@@ -373,7 +222,7 @@ async function createPost() {
     }
 
     if (!currentUserId) {
-        showToast(t("pleaseLoginToPost"), "error");
+        showToast(t("pleaseLoginToPost") || "Please login to post.", "error");
         return;
     }
 
@@ -391,7 +240,6 @@ async function createPost() {
         }
 
         document.getElementById("postContent").value = "";
-        // Clear any active search filter so newly posted content is visible immediately
         const searchInput = document.getElementById("postSearch");
         if (searchInput) {
             searchInput.value = "";
@@ -399,8 +247,8 @@ async function createPost() {
         currentSearch = "";
 
         await loadPosts({ reset: true });
-        scrollToLatestPost();
         showToast(t("postedSuccess"));
+        window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
         showToast(t("unableToPost"), "error");
         console.error("createPost error", err);
@@ -409,18 +257,13 @@ async function createPost() {
 
 async function loadPosts({ reset = true } = {}) {
     const statusEl = document.getElementById("communityStatus");
-    if (reset) {
-        postOffset = 0;
-    }
-
     const container = document.getElementById("postsContainer");
 
     if (reset) {
-        container.innerHTML = "";
+        postOffset = 0;
         if (statusEl) statusEl.innerText = t("loadingPosts");
+        showLoadingSkeleton();
     }
-
-    showLoadingSkeleton();
 
     const params = new URLSearchParams({
         limit: PAGE_SIZE.toString(),
@@ -434,35 +277,25 @@ async function loadPosts({ reset = true } = {}) {
     try {
         const res = await fetch(API + "/community/posts?" + params.toString());
         const json = await res.json();
-
-        // Backend might respond with an error object instead of an array.
         if (!Array.isArray(json)) {
-            const msg = json?.message || json?.detail || t("unableToLoadPosts");
-            showToast(msg, "error");
-            container.innerHTML = `<div style='padding: 18px; color:#333;'>${msg}</div>`;
+            container.innerHTML = `<div class="post-box">Error loading posts</div>`;
             return;
         }
-
         posts = json;
     } catch (err) {
-        const msg = (err && err.message) ? err.message : t("unableToLoadPosts");
-        if (statusEl) statusEl.innerText = "Error: " + msg;
+        if (statusEl) statusEl.innerText = t("unableToLoadPosts");
         showToast(t("unableToLoadPosts"), "error");
         console.error("loadPosts error", err);
-        container.innerHTML = "<div style='padding: 18px; color:#333;'>" + t("unableToLoadPosts") + "</div>";
+        container.innerHTML = `<div class="post-box">${t("unableToLoadPosts")}</div>`;
         return;
     }
 
     if (reset) {
         container.innerHTML = "";
-        if (statusEl) statusEl.innerText = `${posts.length} posts loaded`;
-        if (posts.length > 0) {
-            showToast(`${posts.length} posts loaded`);
-        }
     }
 
     if (reset && posts.length === 0) {
-        container.innerHTML = `<div style='padding: 18px; color:#333;'>${t("noPostsYet")}</div>`;
+        container.innerHTML = `<div class="post-box">${t("noPostsYet")}</div>`;
         if (statusEl) statusEl.innerText = t("noPostsYet");
         return;
     }
@@ -475,39 +308,49 @@ async function loadPosts({ reset = true } = {}) {
             const postDiv = document.createElement("div");
             postDiv.className = "post-card";
 
-            const reactionButtons = ["❤️", "😂", "😮", "😢", "😡"].map((emoji) => {
-                const count = (post.reactions && post.reactions[emoji]) || 0;
-                return `<button onclick="addReaction(${post.id}, '${emoji}')">${emoji} ${count}</button>`;
+            const reactionButtons = [
+                { emoji: "❤️", key: "heart" },
+                { emoji: "😂", key: "laugh" },
+                { emoji: "🌾", key: "farm" },
+                { emoji: "💡", key: "idea" },
+                { emoji: "🙏", key: "thanks" }
+            ].map((item) => {
+                const count = (post.reactions && post.reactions[item.key]) || 0;
+                return `<button class="reaction-btn" type="button" onclick="addReaction(${post.id}, '${item.key}')">${item.emoji} ${count}</button>`;
             }).join("");
 
             const isOwner = post.user_id && currentUserId && String(post.user_id) === String(currentUserId);
             const ownerActions = isOwner ? `
-                <button onclick="editPost(${post.id})">✏️</button>
-                <button onclick="deletePost(${post.id})">🗑️</button>
+                <button class="nav-btn" type="button" onclick="editPost(${post.id})">Edit</button>
+                <button class="nav-btn" type="button" onclick="deletePost(${post.id})">Delete</button>
             ` : "";
 
             postDiv.innerHTML = `
                 <div class="post-header">
-                    <div>
+                    <div class="avatar">F</div>
+                    <div class="post-body">
                         <div class="post-content" id="post-content-${post.id}">${post.content}</div>
-                        <div class="post-meta">Posted by <strong>${post.user_name || "Anonymous"}</strong> • ${new Date(post.timestamp).toLocaleString()}</div>
+                        <div class="post-meta">
+                            Posted by <strong>${post.user_name || "Farmer"}</strong>
+                            - ${new Date(post.timestamp).toLocaleString()}
+                        </div>
                     </div>
                 </div>
 
                 <div class="post-actions">
-                    <button onclick="likePost(${post.id})">👍 ${post.likes || 0}</button>
-                    <button onclick="dislikePost(${post.id})">👎 ${post.dislikes || 0}</button>
+                    <button class="nav-btn" type="button" onclick="likePost(${post.id})">Like ${post.likes || 0}</button>
+                    <button class="nav-btn" type="button" onclick="dislikePost(${post.id})">Skip ${post.dislikes || 0}</button>
                     ${reactionButtons}
                     ${ownerActions}
                 </div>
 
-                <div class="comment" style="margin-top: 14px;">
-                    <input type="text" id="comment-${post.id}" placeholder="Write reply" />
-                    <button class="primary-btn" style="margin-top: 10px;" onclick="addComment(${post.id})">Reply</button>
+                <div class="comment">
+                    <input type="text" id="comment-${post.id}" placeholder="Write reply">
+                    <button class="primary-btn" type="button" onclick="addComment(${post.id})">Reply</button>
                 </div>
 
                 <div id="comments-${post.id}">
-                    ${Array.isArray(comments) ? comments.map(c => `<div class="comment"><strong>${c.user_name || 'Guest'}:</strong> ${c.text}</div>`).join("") : ""}
+                    ${Array.isArray(comments) ? comments.map(c => `<div class="comment"><strong>${c.user_name || "Guest"}:</strong> ${c.text}</div>`).join("") : ""}
                 </div>
             `;
 
@@ -517,14 +360,13 @@ async function loadPosts({ reset = true } = {}) {
         }
     }
 
-    // If we fetched posts but none rendered (due to an unexpected error), show a helpful message.
-    if (posts.length > 0 && container.childElementCount === 0) {
-        container.innerHTML = `<div style='padding: 18px; color:#333;'>${t("unableToRenderPosts")}</div>`;
+    if (statusEl) {
+        statusEl.innerText = `${posts.length} posts loaded`;
     }
 
     const loadMoreBtn = document.getElementById("loadMoreBtn");
     if (loadMoreBtn) {
-        loadMoreBtn.style.display = posts.length < PAGE_SIZE ? "none" : "inline-block";
+        loadMoreBtn.style.display = posts.length < PAGE_SIZE ? "none" : "inline-flex";
     }
 }
 
@@ -545,9 +387,8 @@ async function addReaction(postId, emoji) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ post_id: postId, emoji })
         });
-
         showToast(t("reactedWithEmoji").replace("{emoji}", emoji));
-        loadPosts({ reset: false });
+        loadPosts({ reset: true });
     } catch (err) {
         showToast(t("unableToReact"), "error");
         console.error("addReaction error", err);
@@ -558,10 +399,9 @@ async function likePost(id) {
     try {
         await fetch(API + "/community/like/" + id, { method: "POST" });
         showToast(t("liked"));
-        loadPosts({ reset: false });
+        loadPosts({ reset: true });
     } catch (err) {
         showToast(t("unableToLike"), "error");
-        console.error("likePost error", err);
     }
 }
 
@@ -569,10 +409,9 @@ async function dislikePost(id) {
     try {
         await fetch(API + "/community/dislike/" + id, { method: "POST" });
         showToast(t("disliked"), "error");
-        loadPosts({ reset: false });
+        loadPosts({ reset: true });
     } catch (err) {
         showToast(t("unableToDislike"), "error");
-        console.error("dislikePost error", err);
     }
 }
 
@@ -586,13 +425,10 @@ async function addComment(id) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ post_id: id, user_id: currentUserId || 1, text })
         });
-
         showToast(t("repliedToPost"));
-        loadPosts({ reset: false });
-        scrollToLatestPost();
+        loadPosts({ reset: true });
     } catch (err) {
         showToast(t("unableToAddComment"), "error");
-        console.error("addComment error", err);
     }
 }
 
@@ -657,14 +493,31 @@ function goHome() {
     window.location.href = "index.html";
 }
 
-// Initialize page
+function goToSchemes() {
+    window.location.href = "schemes.html";
+}
+
+function goToMyFarm() {
+    window.location.href = "my-farm.html";
+}
+
+function goToCropCare() {
+    window.location.href = "crop-care.html";
+}
+
+function goToMarket() {
+    window.location.href = "market.html";
+}
+
+function goToProfile() {
+    window.location.href = "profile.html";
+}
+
 if (typeof initI18n === "function") {
     initI18n();
 }
 setTheme(localStorage.getItem("theme") || "light");
 updateAuthButtons();
-const initStatus = document.getElementById("communityStatus");
-if (initStatus) initStatus.innerText = "Initializing community...";
 loadPosts({ reset: true }).then(() => maybeStartTour());
 
 const tourNextBtn = document.getElementById("tourNext");
@@ -672,6 +525,5 @@ const tourSkipBtn = document.getElementById("tourSkip");
 if (tourNextBtn) tourNextBtn.addEventListener("click", nextTourStep);
 if (tourSkipBtn) tourSkipBtn.addEventListener("click", endTour);
 </script>
-
 </body>
 </html>

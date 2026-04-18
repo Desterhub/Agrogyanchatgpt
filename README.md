@@ -42,7 +42,6 @@ New features and improvements are actively being added.
 🎯 Objective
 To empower farmers with accessible, reliable, and intelligent agricultural insights using AI and data analytics.
 
-📌 Author
+📌 Authors
 
-Harsh Shah
-GitHub Profile
+Divyansh Kanti,Diya Mehtalia,Hitanshi Jain,Harsh Shah

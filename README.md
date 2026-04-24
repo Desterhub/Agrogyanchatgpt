@@ -11,6 +11,7 @@ This project aims to bridge the gap between farmers and technology by delivering
 - 📊 Data-driven recommendations using curated datasets
 - 🔍 OCR-based query system (planned/partial implementation)
 - 🔐 User authentication system
+  
 - 🛠️ Tech Stack
   
 Frontend:
@@ -44,4 +45,4 @@ To empower farmers with accessible, reliable, and intelligent agricultural insig
 
 📌 Authors
 
-Divyansh Kanti,Diya Mehtalia,Hitanshi Jain,Harsh Shah
+Harsh Shah,Hitanshi Jain,Divyansh Kanti,Diya Mehtalia

@@ -5971,6 +5971,400 @@ body[data-page="sell-produce"] .hero-panel {
     justify-content: center;
 }
 
+/* Mobile comfort pass: keep the shared header, hero, and dashboard tools usable on phones. */
+@media (max-width: 760px) {
+    body {
+        background-attachment: scroll;
+    }
+
+    body::before,
+    body::after,
+    .page-shell::before,
+    .page-shell::after {
+        display: none;
+    }
+
+    .page-shell {
+        width: calc(100% - 18px) !important;
+        max-width: 440px;
+        padding: 10px 0 30px;
+    }
+
+    .clean-top-bar,
+    .top-bar {
+        position: sticky;
+        top: max(8px, env(safe-area-inset-top));
+        display: grid;
+        grid-template-columns: 1fr;
+        align-items: stretch;
+        gap: 14px;
+        padding: 16px;
+        margin-bottom: 16px;
+        border-radius: 28px;
+        overflow: visible;
+    }
+
+    .clean-top-bar .brand-left,
+    .top-bar .brand-left {
+        width: 100%;
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+
+    .clean-brand-mark,
+    .brand-mark {
+        max-width: 100%;
+        gap: 9px;
+        font-size: clamp(1.55rem, 8.2vw, 2.05rem);
+        line-height: 1.05;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .clean-brand-mark::before,
+    .brand-mark::before {
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+    }
+
+    .welcome-text,
+    .brand-subtitle {
+        width: 100%;
+        font-size: 0.94rem;
+        line-height: 1.35;
+    }
+
+    .clean-top-actions,
+    .top-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .clean-nav {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        width: 100%;
+        align-items: stretch;
+    }
+
+    .clean-nav > *,
+    .nav-dropdown,
+    .hero-copy,
+    .hero-side,
+    .forecast-card,
+    .chat-container,
+    .timeline-card,
+    .advisory-card,
+    .answer-box {
+        min-width: 0;
+    }
+
+    .clean-nav-link {
+        min-height: 44px;
+        width: 100%;
+        justify-content: center;
+        padding: 8px 7px;
+        border-radius: 14px;
+        background: rgba(255, 247, 221, 0.1);
+        border: 1px solid rgba(238, 214, 138, 0.18);
+        font-size: 0.78rem;
+        line-height: 1.12;
+        text-align: center;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .clean-nav-link.active {
+        background: rgba(159, 221, 107, 0.14);
+        border-color: rgba(159, 221, 107, 0.32);
+    }
+
+    .nav-dropdown > summary::after {
+        display: none;
+    }
+
+    .dropdown-panel {
+        position: static;
+        transform: none;
+        min-width: 0;
+        width: 100%;
+        margin-top: 8px;
+        padding: 10px;
+        border-radius: 16px;
+    }
+
+    .dropdown-panel a {
+        min-height: 42px;
+        padding: 10px 12px;
+    }
+
+    .header-utility {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 8px;
+        width: 100%;
+    }
+
+    .header-utility .clean-select,
+    .header-utility .clean-primary-btn,
+    .header-utility .clean-secondary-btn,
+    .header-utility .nav-btn,
+    .header-utility .lang-select {
+        width: 100%;
+        min-width: 0;
+        min-height: 46px;
+        padding: 10px 11px;
+        border-radius: 14px;
+        justify-content: center;
+        text-align: center;
+        font-size: 0.92rem;
+    }
+
+    .trust-strip {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 12px 14px;
+        margin: 0 0 16px;
+        border-radius: 24px;
+        text-align: left;
+    }
+
+    .trust-strip span {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 0.95rem;
+        line-height: 1.35;
+    }
+
+    .hero-panel,
+    .clean-home-hero {
+        width: 100%;
+        max-width: 100%;
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 20px 16px;
+        margin-bottom: 16px;
+        border-radius: 28px;
+    }
+
+    .hero-panel::before {
+        inset: 8px;
+    }
+
+    .hero-panel > *,
+    .hero-copy > *,
+    .forecast-card > *,
+    .chat-container > *,
+    .timeline-card > * {
+        max-width: 100%;
+    }
+
+    .eyebrow {
+        max-width: 100%;
+        padding: 7px 11px;
+        font-size: 0.74rem;
+        line-height: 1.2;
+        letter-spacing: 0.06em;
+    }
+
+    .main-title {
+        margin-top: 12px;
+        max-width: 12ch;
+        font-size: clamp(1.78rem, 8.1vw, 2.1rem);
+        line-height: 1.12;
+        word-break: normal;
+        overflow-wrap: normal;
+    }
+
+    .section-title {
+        font-size: clamp(1.75rem, 9vw, 2.5rem);
+        line-height: 1.05;
+    }
+
+    .panel-title,
+    .answer-box h3,
+    .history-box h3,
+    .market-board h3,
+    .advisory-card h3,
+    .timeline-card h3 {
+        font-size: 1.28rem;
+        line-height: 1.18;
+    }
+
+    .subtitle {
+        max-width: 32ch;
+        margin-top: 12px;
+        font-size: 1rem;
+        line-height: 1.55;
+        overflow-wrap: break-word;
+    }
+
+    .hero-meta-row,
+    .hero-cta-row,
+    .hero-actions,
+    .controls,
+    .left-controls,
+    .right-controls,
+    .image-upload,
+    .section-header,
+    .forecast-meta,
+    .weather-main-row,
+    .weather-top-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .hero-chip,
+    .hero-cta-row .primary-btn,
+    .hero-cta-row .nav-btn,
+    .voice-workflow-strip .workflow-btn,
+    .left-controls .primary-btn,
+    .left-controls .nav-btn,
+    .right-controls select,
+    .image-upload input,
+    .image-upload button {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .voice-workflow-strip {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        align-items: stretch;
+    }
+
+    .voice-workflow-strip .workflow-label,
+    .voice-workflow-strip .primary-btn {
+        grid-column: 1 / -1;
+    }
+
+    .clean-support-grid,
+    .hero-stats,
+    .compact-hero-stats,
+    .dashboard-widgets,
+    .dashboard-grid,
+    .assistant-side,
+    .profile-grid,
+    .profile-highlight,
+    .market-grid,
+    .scheme-grid,
+    .command-center-grid,
+    .home-secondary-grid,
+    .home-feature-band {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card,
+    .timeline-card,
+    .advisory-card,
+    .chat-container,
+    .answer-box,
+    .forecast-card,
+    .quick-link-card,
+    .post-box,
+    .post-card,
+    .profile-card,
+    .scheme-card {
+        padding: 16px;
+        border-radius: 22px;
+    }
+
+    .forecast-temp {
+        font-size: clamp(2.1rem, 13vw, 3.1rem);
+        overflow-wrap: anywhere;
+    }
+
+    .weather-ai-badge-box {
+        align-self: center;
+        width: 78px;
+        height: 78px;
+        margin: 4px auto 0;
+        transform: none;
+    }
+
+    .weather-story-card {
+        min-height: 180px;
+    }
+
+    .weather-summary-card,
+    .weather-detail-row,
+    .weather-story-mini,
+    .weather-stats-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .question-input {
+        min-height: 170px;
+        font-size: 1rem;
+    }
+
+    .assistant-orb {
+        width: 56px;
+        height: 56px;
+        right: 12px;
+        bottom: max(12px, env(safe-area-inset-bottom));
+    }
+
+    .assistant-orb-core {
+        width: 20px;
+        height: 20px;
+    }
+
+    .assistant-orb-label {
+        bottom: 5px;
+        font-size: 0.58rem;
+    }
+
+    .dashboard-frame-card {
+        display: none;
+    }
+}
+
+@media (max-width: 390px) {
+    .page-shell {
+        width: calc(100% - 14px) !important;
+    }
+
+    .clean-top-bar,
+    .top-bar {
+        padding: 14px;
+        border-radius: 24px;
+    }
+
+    .clean-brand-mark,
+    .brand-mark {
+        font-size: clamp(1.35rem, 7.8vw, 1.78rem);
+    }
+
+    .clean-nav {
+        gap: 6px;
+    }
+
+    .clean-nav-link {
+        min-height: 42px;
+        padding: 7px 3px;
+        font-size: 0.68rem;
+    }
+
+    .header-utility {
+        grid-template-columns: 1fr;
+    }
+
+    .main-title {
+        font-size: clamp(1.72rem, 8.2vw, 2.05rem);
+    }
+}
+
 @keyframes livePulse {
     0%, 100% {
         transform: scale(0.82);

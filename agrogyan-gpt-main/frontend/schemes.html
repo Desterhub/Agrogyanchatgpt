@@ -6,9 +6,10 @@
 <title>Government Schemes</title>
 <link rel="stylesheet" href="style.css">
 <script defer src="ui.js"></script>
+<script defer src="api-config.js"></script>
 <script defer src="i18n.js"></script>
 </head>
-<body>
+<body data-page="schemes">
 <div class="page-shell">
     <header class="top-bar">
         <div class="brand-left">
@@ -58,8 +59,17 @@
             <div class="forecast-card">
                 <span class="meta-label">Explore smarter</span>
                 <div class="forecast-temp">10</div>
-                <div style="font-size: 1.1rem; font-weight: 700;">Key schemes preloaded</div>
-                <p class="subnote" style="color: rgba(255, 244, 207, 0.78); margin-top: 10px;">Use favorites to build your shortlist before applying on official portals.</p>
+                <div class="hero-status-kicker">Key schemes preloaded</div>
+                <p class="hero-status-copy">Find support faster with category tabs, favorites, eligibility hints, and document prep.</p>
+                <div class="hero-status-list">
+                    <span>Income, insurance, loan, irrigation, and tech tabs</span>
+                    <span>Favorite schemes for later review</span>
+                    <span>Eligibility and document checklist below</span>
+                </div>
+                <div class="hero-status-actions">
+                    <a class="primary-btn" href="#schemeList">Browse schemes</a>
+                    <a class="nav-btn" href="my-farm.html">Complete farm profile</a>
+                </div>
             </div>
         </aside>
     </section>
@@ -164,7 +174,7 @@ function pageText(key) {
 }
 
 function getFavoriteSchemes() {
-    return JSON.parse(localStorage.getItem("favoriteSchemes") || "[]");
+    return typeof window.readAgroJson === "function" ? window.readAgroJson("favoriteSchemes", []) : [];
 }
 
 function toggleFavorite(schemeName) {
@@ -263,7 +273,11 @@ if (!currentUser) {
 
 const welcomeUser = document.getElementById("welcomeUser");
 if (welcomeUser) {
-    welcomeUser.innerText = currentUser ? t("welcomeUserPrefix") + currentUser : "";
+    if (currentUser && typeof window.renderUserWelcome === "function") {
+        window.renderUserWelcome(welcomeUser, currentUser);
+    } else {
+        welcomeUser.innerText = currentUser ? `${String(currentUser).trim().split(/\s+/)[0] || "Farmer"}'s live farm desk` : "";
+    }
 }
 
 function goHome() {
@@ -301,12 +315,16 @@ function logout() {
 function renderEligibilityDesk() {
     const eligibilitySummary = document.getElementById("eligibilitySummary");
     const documentChecklist = document.getElementById("documentChecklist");
-    const crop = localStorage.getItem("crop_name");
-    const land = localStorage.getItem("land_size");
+    const farm = typeof window.getAgroFarmSnapshot === "function" ? window.getAgroFarmSnapshot() : {};
+    const crop = farm.crop || localStorage.getItem("crop_name");
+    const land = farm.land || localStorage.getItem("land_size");
+    const season = farm.season || localStorage.getItem("season");
+    const irrigation = (farm.irrigation || localStorage.getItem("farm_irrigation") || "").toLowerCase();
     const items = [];
     if (crop) items.push(`PM-KISAN: ${pageText("eligible")}`);
     if (land) items.push(`Kisan Credit Card: ${pageText("eligible")}`);
-    if (crop && localStorage.getItem("season")) items.push(`PM Fasal Bima Yojana: ${pageText("eligible")}`);
+    if (crop && season) items.push(`PM Fasal Bima Yojana: ${pageText("eligible")}`);
+    if (irrigation && !irrigation.includes("drip")) items.push(`PM Krishi Sinchai Yojana: ${pageText("checkDocs")}`);
     if (!items.length) items.push(pageText("completeProfile"));
     if (eligibilitySummary) {
         eligibilitySummary.innerHTML = items.map(item => `<div class="timeline-item"><p>${item}</p></div>`).join("");
@@ -324,6 +342,11 @@ window.addEventListener("ui-language-changed", () => {
     renderSchemes(currentTab);
     renderEligibilityDesk();
 });
+
+window.addEventListener("agro-farm-profile-updated", renderEligibilityDesk);
+if (typeof window.refreshAgroProfileFromServer === "function") {
+    window.refreshAgroProfileFromServer().then(renderEligibilityDesk);
+}
 </script>
 </body>
 </html>

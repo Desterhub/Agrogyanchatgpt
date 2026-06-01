@@ -48,8 +48,17 @@
             <div class="forecast-card">
                 <span class="meta-label">AI crop watch</span>
                 <div class="forecast-temp">24x7</div>
-                <div style="font-size: 1.1rem; font-weight: 700;">Diagnosis + action support</div>
-                <p class="subnote" style="color: rgba(255, 244, 207, 0.78); margin-top: 10px;">Run fast checks here before calling an expert or making a costly field decision.</p>
+                <div class="hero-status-kicker">Diagnosis + action support</div>
+                <p class="hero-status-copy">Move from symptoms to field-safe next steps with image checks and crop decisions.</p>
+                <div class="hero-status-list">
+                    <span>Upload leaf or crop photos</span>
+                    <span>Compare crop choices by ROI and risk</span>
+                    <span>Jump to shop when treatment is needed</span>
+                </div>
+                <div class="hero-status-actions">
+                    <a class="primary-btn" href="#cropDoctorInput">Upload image</a>
+                    <a class="nav-btn" href="shop.html">Open Smart Shop</a>
+                </div>
             </div>
         </aside>
     </section>
@@ -66,6 +75,7 @@
             <input id="cropDoctorInput" type="file" accept="image/*">
             <button class="primary-btn" type="button" onclick="runCropDoctor()">Analyze leaf or crop issue</button>
             <div id="cropDoctorResult" class="timeline-list"></div>
+            <div id="cropDoctorShopLink" class="timeline-list"></div>
         </section>
 
         <section class="dashboard-widgets">

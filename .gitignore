@@ -1,0 +1,50 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*secret*
+*token*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+venv/
+.venv/
+env/
+
+# Local databases and uploads
+*.db
+*.sqlite
+*.sqlite3
+agrogyan.db
+uploads/
+backend/uploads/
+agrogyan-gpt-main/backend/uploads/
+
+# Browser/test profiles and debug output
+.edge*/
+agrogyan-gpt-main/.edge*/
+playwright-report/
+test-results/
+*.log
+
+# Editor/OS local files
+.history/
+agrogyan-gpt-main/.history/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Temporary downloaded/exported pages
+temp_drive_folder.html
+agrogyan-gpt-main/temp_drive_folder.html

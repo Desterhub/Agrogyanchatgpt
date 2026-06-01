@@ -133,3 +133,111 @@ class AlertRecord(Base):
     category = Column(String, nullable=False, default="general")
     source = Column(String, nullable=True, default="system")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class InventoryItem(Base):
+    __tablename__ = "inventory_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    product_id = Column(String, unique=True, index=True, nullable=False)
+    product_name = Column(String, nullable=False)
+    category = Column(String, nullable=True, index=True)
+    seller = Column(String, nullable=True)
+    stock_count = Column(Integer, nullable=False, default=0)
+    unit = Column(String, nullable=True)
+    price = Column(String, nullable=True)
+    price_source = Column(String, nullable=True, default="catalog")
+    source = Column(String, nullable=True, default="system")
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class OrderRecord(Base):
+    __tablename__ = "order_records"
+
+    id = Column(Integer, primary_key=True, index=True)
+    order_code = Column(String, unique=True, index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
+    customer_name = Column(String, nullable=False)
+    customer_phone = Column(String, nullable=True)
+    delivery_address = Column(Text, nullable=False)
+    payment_method = Column(String, nullable=True)
+    item_summary = Column(Text, nullable=False)
+    item_count = Column(Integer, nullable=False, default=0)
+    total = Column(String, nullable=False)
+    status = Column(String, nullable=False, default="Order placed")
+    source = Column(String, nullable=True, default="shop")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class OrderStatusEvent(Base):
+    __tablename__ = "order_status_events"
+
+    id = Column(Integer, primary_key=True, index=True)
+    order_code = Column(String, index=True, nullable=False)
+    status = Column(String, nullable=False)
+    note = Column(Text, nullable=True)
+    source = Column(String, nullable=True, default="system")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class DemandSignal(Base):
+    __tablename__ = "demand_signals"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
+    product_id = Column(String, nullable=False, index=True)
+    product_name = Column(String, nullable=True)
+    signal_type = Column(String, nullable=False, index=True)
+    source = Column(String, nullable=True, default="shop")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class MarketAlertSubscription(Base):
+    __tablename__ = "market_alert_subscriptions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
+    crop = Column(String, nullable=False, index=True)
+    target_price = Column(String, nullable=False)
+    district = Column(String, nullable=True, index=True)
+    state = Column(String, nullable=True, index=True)
+    channel = Column(String, nullable=True, default="in_app")
+    is_active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class SchemeSnapshot(Base):
+    __tablename__ = "scheme_snapshots"
+
+    id = Column(Integer, primary_key=True, index=True)
+    scheme_name = Column(String, nullable=False, index=True)
+    state = Column(String, nullable=True, index=True)
+    crop = Column(String, nullable=True, index=True)
+    summary = Column(Text, nullable=False)
+    eligibility = Column(Text, nullable=True)
+    source = Column(String, nullable=True, default="rules")
+    captured_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class FarmerProduceListing(Base):
+    __tablename__ = "farmer_produce_listings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    listing_code = Column(String, unique=True, index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
+    seller_name = Column(String, nullable=False)
+    seller_phone = Column(String, nullable=True)
+    seller_location = Column(String, nullable=True)
+    crop_name = Column(String, nullable=False, index=True)
+    category = Column(String, nullable=True, index=True)
+    quantity = Column(Integer, nullable=False, default=0)
+    available_quantity = Column(Integer, nullable=False, default=0)
+    unit = Column(String, nullable=False, default="kg")
+    price_per_unit = Column(String, nullable=False)
+    harvest_date = Column(String, nullable=True)
+    description = Column(Text, nullable=True)
+    image_url = Column(String, nullable=True)
+    is_active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

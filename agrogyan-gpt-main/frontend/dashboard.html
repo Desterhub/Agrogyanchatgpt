@@ -6,8 +6,9 @@
   <title>Dashboard - AgroGyanGPT</title>
   <link rel="stylesheet" href="style.css">
   <script defer src="ui.js"></script>
+  <script defer src="api-config.js"></script>
 </head>
-<body>
+<body data-page="dashboard">
 <script>
   if (!localStorage.getItem("user")) {
     window.location.href = "login.html";
@@ -36,7 +37,17 @@
       <div class="forecast-card">
         <span class="meta-label">Signed in as</span>
         <div class="forecast-temp" id="userName">Farmer</div>
-        <div style="font-size: 1.1rem; font-weight: 700;">Session active</div>
+        <div class="hero-status-kicker">Session active</div>
+        <p class="hero-status-copy">Open the main app in a full dashboard frame while keeping your login session ready.</p>
+        <div class="hero-status-list">
+          <span>Main app embedded below</span>
+          <span>Quick return to home workspace</span>
+          <span>Logout control available in the header</span>
+        </div>
+        <div class="hero-status-actions">
+          <a class="primary-btn" href="index.html">Open Main App</a>
+          <button class="nav-btn" onclick="logout()" type="button">Logout</button>
+        </div>
       </div>
     </aside>
   </section>

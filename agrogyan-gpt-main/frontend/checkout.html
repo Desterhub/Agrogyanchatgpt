@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroGyanGPT | Checkout</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="ui.js"></script>
+    <script defer src="api-config.js"></script>
+    <script defer src="i18n.js"></script>
+    <script defer src="script.js"></script>
+    <script defer src="farmer-pages.js"></script>
+    <script defer src="shop-catalog.js"></script>
+</head>
+<body data-page="checkout">
+<div class="page-shell">
+    <header class="top-bar clean-top-bar">
+        <div class="brand-left">
+            <a class="brand-mark clean-brand-mark" href="index.html">AgroGyanGPT</a>
+            <div id="welcomeUser" class="welcome-text">Structured payment and checkout</div>
+        </div>
+        <div class="top-actions clean-top-actions">
+            <nav class="clean-nav" aria-label="Primary">
+                <a class="clean-nav-link" href="index.html">Home</a>
+                <details class="nav-dropdown">
+                    <summary class="clean-nav-link">Farmer Setup</summary>
+                    <div class="dropdown-panel">
+                        <a href="my-farm.html">My Farm</a>
+                        <a href="crop-care.html">Crop Care</a>
+                        <a href="market.html">Market</a>
+                        <a href="shop.html">Smart Shop</a>
+                    </div>
+                </details>
+                <details class="nav-dropdown">
+                    <summary class="clean-nav-link">More</summary>
+                    <div class="dropdown-panel">
+                        <a href="schemes.html">Schemes</a>
+                        <a href="community.html">Community</a>
+                        <a href="profile.html">Profile</a>
+                    </div>
+                </details>
+            </nav>
+            <div class="header-utility">
+                <select id="uiLanguage" class="lang-select clean-select" aria-label="UI Language">
+                    <option value="English">English</option>
+                    <option value="Hindi">Hindi</option>
+                    <option value="Marathi">Marathi</option>
+                </select>
+                <button id="themeButton" class="nav-btn clean-secondary-btn" type="button" onclick="toggleTheme()">Theme</button>
+                <button id="authButton" class="nav-btn clean-primary-btn" type="button"></button>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero-panel">
+        <div class="hero-copy">
+            <p class="eyebrow">Checkout</p>
+            <h1 class="main-title">Complete your order with a proper checkout flow.</h1>
+            <p class="subtitle">This page separates cart review, address details, payment method, and final order placement so the experience feels like a real commerce platform.</p>
+        </div>
+        <aside class="hero-side">
+            <div class="forecast-card">
+                <span class="meta-label">Checkout value</span>
+                <div class="forecast-temp" id="checkoutHeroTotal">Rs 0</div>
+                <div id="checkoutHeroCount" class="hero-status-kicker">0 items</div>
+                <p class="hero-status-copy">Confirm delivery, payment, and final order details before placing the farm input order.</p>
+                <div class="hero-status-list">
+                    <span>Address draft saves locally</span>
+                    <span>COD, UPI, and card payment choices</span>
+                    <span>Final validation before order placement</span>
+                </div>
+                <div class="hero-status-actions">
+                    <a class="primary-btn" href="#checkoutCustomerName">Add delivery details</a>
+                    <a class="nav-btn" href="cart.html">Edit Cart</a>
+                </div>
+            </div>
+        </aside>
+    </section>
+
+    <main class="checkout-page-layout">
+        <section class="checkout-main-column">
+            <section class="post-box">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Checkout steps</p>
+                        <h2 class="section-title">Delivery, payment, and confirmation</h2>
+                    </div>
+                    <a class="nav-btn" href="cart.html">Back to Cart</a>
+                </div>
+
+                <div class="checkout-step-strip">
+                    <div class="checkout-step active"><span>1</span><strong>Address</strong></div>
+                    <div class="checkout-step active"><span>2</span><strong>Payment</strong></div>
+                    <div class="checkout-step"><span>3</span><strong>Review</strong></div>
+                </div>
+            </section>
+
+            <section class="post-box checkout-section-card">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Delivery details</p>
+                        <h3>Farmer and shipping information</h3>
+                    </div>
+                    <div class="badge-chip active">Saved locally</div>
+                </div>
+
+                <div class="decision-form-grid decision-form-grid-wide checkout-form-grid">
+                    <label><span>Farmer name</span><input id="checkoutCustomerName" type="text" placeholder="Your full name" oninput="saveCheckoutDraft()"></label>
+                    <label><span>Mobile number</span><input id="checkoutCustomerPhone" type="text" placeholder="10-digit mobile number" oninput="saveCheckoutDraft()"></label>
+                    <label><span>Email</span><input id="checkoutCustomerEmail" type="text" placeholder="Optional email" oninput="saveCheckoutDraft()"></label>
+                    <label><span>Pincode</span><input id="checkoutPincode" type="text" placeholder="Pincode" oninput="saveCheckoutDraft()"></label>
+                    <label class="checkout-span-2"><span>Street / landmark</span><input id="checkoutStreet" type="text" placeholder="House number, road, landmark" oninput="saveCheckoutDraft()"></label>
+                    <label><span>Village / city</span><input id="checkoutVillageCity" type="text" placeholder="Village or city" oninput="saveCheckoutDraft()"></label>
+                    <label><span>State</span><input id="checkoutState" type="text" placeholder="State" oninput="saveCheckoutDraft()"></label>
+                    <label class="checkout-span-2"><span>Delivery instructions</span><input id="checkoutInstructions" type="text" placeholder="Call before arrival / daytime delivery" oninput="saveCheckoutDraft()"></label>
+                </div>
+            </section>
+
+            <section class="post-box checkout-section-card">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Payment options</p>
+                        <h3>Select payment method</h3>
+                    </div>
+                    <div id="checkoutDeliveryNote" class="small-note">Standard delivery in 2 to 4 days for most products.</div>
+                </div>
+
+                <div class="payment-option-grid" id="paymentOptionGrid">
+                    <button class="payment-option-card active" type="button" data-payment-method="COD" onclick="selectPaymentMethod('COD')">
+                        <strong>Cash on Delivery</strong>
+                        <p>Pay when the order reaches you.</p>
+                    </button>
+                    <button class="payment-option-card" type="button" data-payment-method="UPI" onclick="selectPaymentMethod('UPI')">
+                        <strong>UPI</strong>
+                        <p>Use a UPI ID for a cleaner digital flow.</p>
+                    </button>
+                    <button class="payment-option-card" type="button" data-payment-method="Card" onclick="selectPaymentMethod('Card')">
+                        <strong>Card</strong>
+                        <p>Structured card step for a full checkout experience.</p>
+                    </button>
+                </div>
+
+                <div id="checkoutPaymentPanel" class="checkout-payment-panel"></div>
+            </section>
+        </section>
+
+        <aside class="timeline-card checkout-summary-panel">
+            <p class="eyebrow">Order review</p>
+            <h3>Final summary</h3>
+            <div id="checkoutOrderItems" class="checkout-order-list"></div>
+            <div id="checkoutSummaryBody" class="timeline-list"></div>
+            <div class="checkout-summary-actions">
+                <a class="nav-btn" href="cart.html">Edit Cart</a>
+                <button id="checkoutPlaceOrderButton" class="primary-btn" type="button" onclick="placeShopOrder()">Place Order</button>
+            </div>
+            <div id="checkoutStatusMessage" class="small-note">Payment and address selections will be validated before order placement.</div>
+            <div class="timeline-list" id="checkoutOrderTracking"></div>
+        </aside>
+    </main>
+</div>
+</body>
+</html>

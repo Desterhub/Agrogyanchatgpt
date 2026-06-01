@@ -11,7 +11,26 @@
 1. Push this project to GitHub.
 2. Create a new Render Web Service from that GitHub repo.
 3. Render should detect `render.yaml` automatically.
-4. After deploy finishes, open your Render URL. It should load `login.html` from the same server.
+4. Add these environment variables in Render before testing OTP signup:
+
+```text
+OTP_PROVIDER=twilio
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_SMS_FROM=your_twilio_sms_number
+TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
+```
+
+5. After deploy finishes, open your Render URL. It should load `login.html` from the same server.
+
+## Real OTP delivery
+
+- Registration OTP is no longer meant to appear in the UI panel.
+- The backend now sends the OTP through Twilio based on the user’s selected channel:
+  `sms` uses `TWILIO_SMS_FROM`
+  `whatsapp` uses `TWILIO_WHATSAPP_FROM`
+- The message includes a short closing line from AgroGyanGPT.
+- If Twilio credentials are missing, the API now returns a configuration error instead of showing a demo OTP.
 
 ## Local run
 

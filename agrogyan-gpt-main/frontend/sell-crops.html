@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroGyanGPT | Farmer Produce Market</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="ui.js"></script>
+    <script defer src="api-config.js"></script>
+    <script defer src="i18n.js"></script>
+    <script defer src="script.js"></script>
+    <script defer src="farmer-pages.js"></script>
+</head>
+<body data-page="sell-produce">
+<div class="page-shell">
+    <header class="top-bar clean-top-bar"></header>
+
+    <section class="hero-panel produce-hero-panel">
+        <div class="hero-copy">
+            <div class="page-signature page-signature-market">Farmer-to-buyer produce market</div>
+            <p class="eyebrow">Sell direct</p>
+            <h1 class="main-title">List your crops, vegetables, and harvest lots, then let buyers order them like a shopping page.</h1>
+            <p class="subtitle">This page collects farmer produce details, publishes them into a live marketplace grid, and lets buyers use a produce cart for ordering.</p>
+            <div class="hero-stats">
+                <div class="stat-card"><span class="stat-label">Live listings</span><span class="stat-value" id="produceListingCount">0 live farmer listings</span></div>
+                <div class="stat-card"><span class="stat-label">Buyer cart</span><span class="stat-value" id="produceCartCount">0 units selected</span></div>
+                <div class="stat-card"><span class="stat-label">Market note</span><span class="stat-value" id="produceMarketplaceNote">Loading produce market...</span></div>
+            </div>
+        </div>
+        <aside class="hero-side">
+            <div class="forecast-card">
+                <span class="meta-label">What this page does</span>
+                <div class="forecast-temp">Sell + buy</div>
+                <div class="hero-status-kicker">Farmer listings become marketplace cards</div>
+                <p class="hero-status-copy">Publish harvest lots with buyer-ready details, then manage interest from the same page.</p>
+                <div class="hero-status-list">
+                    <span>Seller contact, location, quantity, and price</span>
+                    <span>Buyer filters, search, and produce cart</span>
+                    <span>COD, UPI, or bank transfer order flow</span>
+                </div>
+                <div class="hero-status-actions">
+                    <a class="primary-btn" href="#produceSellerName">Publish listing</a>
+                    <a class="nav-btn" href="#produceMarketplaceGrid">Browse market</a>
+                </div>
+            </div>
+        </aside>
+    </section>
+
+    <main class="community-container">
+        <section class="dashboard-widgets produce-market-layout">
+            <div class="timeline-card produce-seller-panel">
+                <p class="eyebrow">Farmer listing form</p>
+                <h3>Publish produce for sale</h3>
+                <div class="decision-form-grid decision-form-grid-wide">
+                    <label><span>Farmer name</span><input id="produceSellerName" type="text" placeholder="Farmer or group name"></label>
+                    <label><span>Mobile number</span><input id="produceSellerPhone" type="text" placeholder="10-digit phone"></label>
+                    <label><span>Location</span><input id="produceSellerLocation" type="text" placeholder="Village, district, state"></label>
+                    <label><span>Crop / produce</span><input id="produceCropName" type="text" placeholder="Tomato, onion, wheat, chilli"></label>
+                    <label><span>Category</span><select id="produceCategory"><option value="vegetable">Vegetable</option><option value="crop">Crop</option><option value="fruit">Fruit</option><option value="grain">Grain</option><option value="other">Other</option></select></label>
+                    <label><span>Quantity</span><input id="produceQuantity" type="number" min="1" placeholder="100"></label>
+                    <label><span>Unit</span><select id="produceUnit"><option value="kg">kg</option><option value="quintal">quintal</option><option value="bag">bag</option><option value="crate">crate</option></select></label>
+                    <label><span>Price per unit</span><input id="producePrice" type="text" placeholder="e.g. 24"></label>
+                    <label><span>Harvest date / lot note</span><input id="produceHarvestDate" type="text" placeholder="Fresh harvest this week"></label>
+                    <label><span>Image URL</span><input id="produceImageUrl" type="text" placeholder="Optional image link"></label>
+                </div>
+                <label><span>Description</span><textarea id="produceDescription" rows="4" placeholder="Quality, grading, loading, or freshness details"></textarea></label>
+                <div class="section-header">
+                    <button class="primary-btn" type="button" onclick="submitProduceListing()">Publish produce</button>
+                    <a class="nav-btn" href="market.html">Back to Market Desk</a>
+                </div>
+                <p id="produceSellerMessage" role="alert" aria-live="polite"></p>
+            </div>
+
+            <div class="timeline-card produce-buyer-panel">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Buyer marketplace</p>
+                        <h3>Browse farmer listings</h3>
+                    </div>
+                </div>
+                <div class="decision-form-grid">
+                    <label><span>Category</span><select id="produceFilterCategory" onchange="renderProduceWorkspace()"><option value="all">All</option><option value="vegetable">Vegetable</option><option value="crop">Crop</option><option value="fruit">Fruit</option><option value="grain">Grain</option><option value="other">Other</option></select></label>
+                    <label><span>Search</span><input id="produceSearchInput" type="text" placeholder="Tomato, Pune, onion" oninput="renderProduceWorkspace()"></label>
+                </div>
+                <div id="produceMarketplaceGrid" class="shop-product-grid"></div>
+            </div>
+        </section>
+
+        <section class="dashboard-widgets">
+            <div class="timeline-card">
+                <p class="eyebrow">Produce cart</p>
+                <h3>Buyer order cart</h3>
+                <div id="produceCartBody" class="timeline-list"></div>
+                <div class="section-header">
+                    <span class="badge-chip active">Estimated total <strong id="produceCartTotal">Rs 0</strong></span>
+                    <button class="nav-btn" type="button" onclick="clearProduceCart()">Reset cart</button>
+                </div>
+            </div>
+            <div class="timeline-card">
+                <p class="eyebrow">Buyer details</p>
+                <h3>Place produce order</h3>
+                <div class="decision-form-grid decision-form-grid-wide">
+                    <label><span>Buyer name</span><input id="produceBuyerName" type="text" placeholder="Buyer or trader name"></label>
+                    <label><span>Buyer phone</span><input id="produceBuyerPhone" type="text" placeholder="Contact number"></label>
+                    <label><span>Payment method</span><select id="producePaymentMethod"><option value="COD">Cash on delivery</option><option value="UPI">UPI</option><option value="Bank Transfer">Bank transfer</option></select></label>
+                </div>
+                <label><span>Delivery / pickup address</span><textarea id="produceBuyerAddress" rows="4" placeholder="Address for delivery or pickup coordination"></textarea></label>
+                <div class="section-header">
+                    <button class="primary-btn" type="button" onclick="placeProduceOrder()">Place produce order</button>
+                </div>
+                <p id="produceBuyerMessage" role="alert" aria-live="polite"></p>
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

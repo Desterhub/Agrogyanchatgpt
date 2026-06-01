@@ -5,36 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AgroGyanGPT | My Farm</title>
     <link rel="stylesheet" href="style.css">
-    <script defer src="ui.js"></script>
-    <script defer src="api-config.js"></script>
-    <script defer src="i18n.js"></script>
-    <script defer src="farmer-pages.js"></script>
+    <script defer src="ui.js?v=20260501-farmfix"></script>
+    <script defer src="api-config.js?v=20260501-farmfix"></script>
+    <script defer src="i18n.js?v=20260501-farmfix"></script>
+    <script defer src="farmer-pages.js?v=20260501-farmfix2"></script>
 </head>
 <body data-page="my-farm">
 <div class="page-shell">
-    <header class="top-bar">
+    <header class="top-bar clean-top-bar">
         <div class="brand-left">
-            <div class="brand-mark">AgroGyanGPT</div>
+            <a class="brand-mark clean-brand-mark" href="index.html">AgroGyanGPT</a>
             <div id="welcomeUser" class="welcome-text">Farm setup and planning</div>
         </div>
-        <div class="top-actions">
-            <select id="uiLanguage" class="lang-select" aria-label="UI Language">
-                <option value="English">English</option>
-                <option value="Hindi">Hindi</option>
-                <option value="Marathi">Marathi</option>
-            </select>
-            <button id="themeButton" class="nav-btn" type="button" onclick="toggleTheme()" data-i18n="theme">Theme</button>
-            <a class="nav-btn" href="index.html">Home</a>
-            <a class="nav-btn" href="crop-care.html" data-i18n="cropCare">Crop Care</a>
-            <a class="nav-btn" href="market.html" data-i18n="market">Market</a>
-            <a class="nav-btn" href="schemes.html">Schemes</a>
-            <a class="nav-btn" href="profile.html">Profile</a>
-            <button id="authButton" class="nav-btn" type="button"></button>
+        <div class="top-actions clean-top-actions">
+            <nav class="clean-nav" aria-label="Primary">
+                <a class="clean-nav-link" href="index.html">Home</a>
+                <details class="nav-dropdown">
+                    <summary class="clean-nav-link">Farmer Setup</summary>
+                    <div class="dropdown-panel">
+                        <a href="my-farm.html">My Farm</a>
+                        <a href="crop-care.html">Crop Care</a>
+                        <a href="market.html">Market</a>
+                    </div>
+                </details>
+                <details class="nav-dropdown">
+                    <summary class="clean-nav-link">More</summary>
+                    <div class="dropdown-panel">
+                        <a href="schemes.html">Schemes</a>
+                        <a href="profile.html">Profile</a>
+                    </div>
+                </details>
+            </nav>
+            <div class="header-utility">
+                <select id="uiLanguage" class="lang-select clean-select" aria-label="UI Language">
+                    <option value="English">English</option>
+                    <option value="Hindi">Hindi</option>
+                    <option value="Marathi">Marathi</option>
+                </select>
+                <button id="themeButton" class="nav-btn clean-secondary-btn" type="button" onclick="toggleTheme()" data-i18n="theme">Theme</button>
+                <button id="authButton" class="nav-btn clean-primary-btn" type="button"></button>
+            </div>
         </div>
     </header>
 
     <section class="hero-panel">
         <div class="hero-copy">
+            <div class="page-signature page-signature-farm">Personalized farm memory and planning</div>
             <p class="eyebrow" data-i18n="myFarm">Farmer setup</p>
             <h1 class="main-title" data-i18n="myFarmHeroTitle">Build the farm profile behind your AI answers.</h1>
             <p class="subtitle" data-i18n="myFarmHeroSubtitle">Everything here improves personalization. Set your crop, land, soil, season, irrigation, and village once, and AgroGyanGPT can adapt advice across weather, planning, crop care, and schemes.</p>
@@ -57,8 +73,17 @@
             <div class="forecast-card">
                 <span class="meta-label">Farm setup status</span>
                 <div class="forecast-temp" id="farmSetupStatus">Ready</div>
-                <div style="font-size: 1.1rem; font-weight: 700;">Personalized dashboard inputs</div>
-                <p class="subnote" style="color: rgba(255, 244, 207, 0.78); margin-top: 10px;">Use this page as the real farmer setup center instead of keeping all these fields on the homepage.</p>
+                <div class="hero-status-kicker">Personalized dashboard inputs</div>
+                <p class="hero-status-copy">Save the farm facts that power weather, schemes, market signals, and AI answers.</p>
+                <div class="hero-status-list">
+                    <span>Crop, soil, season, and irrigation memory</span>
+                    <span>Map preview with estimated farm boundary</span>
+                    <span>Planner and scheme matching unlocked</span>
+                </div>
+                <div class="hero-status-actions">
+                    <a class="primary-btn" href="#farmCrop">Update setup</a>
+                    <a class="nav-btn" href="crop-care.html">Use in Crop Care</a>
+                </div>
             </div>
         </aside>
     </section>
@@ -83,13 +108,52 @@
                 <label><span>Village</span><input id="farmVillage" type="text" placeholder="Village or farm name"></label>
                 <label><span>Preferred language</span><select id="farmLanguage"><option value="English">English</option><option value="Hindi">Hindi</option><option value="Marathi">Marathi</option></select></label>
                 <label><span>Irrigation type</span><input id="farmIrrigation" type="text" placeholder="Drip / Canal / Borewell"></label>
+                <label><span>Season budget</span><input id="farmBudget" type="text" placeholder="e.g. 50000"></label>
                 <label><span>Taluka</span><input id="farmTaluka" type="text" placeholder="Taluka"></label>
                 <label><span>Farm name</span><input id="farmName" type="text" placeholder="Farm name"></label>
+                <label><span>Street address</span><input id="farmStreetAddress" type="text" placeholder="House no, road, landmark"></label>
+                <label><span>City / district</span><input id="farmCity" type="text" placeholder="City or district"></label>
+                <label><span>State</span><input id="farmState" type="text" placeholder="State"></label>
+                <label><span>Pincode</span><input id="farmPincode" type="text" placeholder="Pincode"></label>
             </div>
 
             <div class="section-header">
-                <div id="farmSaveMessage" class="small-note">Save your farm profile to improve AI suggestions.</div>
-                <button class="primary-btn" type="button" onclick="saveMyFarmSetup()" data-i18n="saveMyFarmSetup">Save My Farm Setup</button>
+                <div id="farmSaveMessage" class="small-note farm-save-message-info" role="status" aria-live="polite">Save your farm profile to improve AI suggestions.</div>
+                <div class="shortcut-inline">
+                    <button id="viewFarmButton" class="nav-btn" type="button" onclick="viewFarmOnMap()">View Your Farm</button>
+                    <button id="saveFarmButton" class="primary-btn" type="button" onclick="saveMyFarmSetup()" data-i18n="saveMyFarmSetup">Save My Farm Setup</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="post-box farm-map-section">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Farm map</p>
+                    <h2 class="section-title">Locate your farm on the map</h2>
+                </div>
+                <a class="nav-btn" id="farmMapOpenLink" href="https://www.google.com/maps" target="_blank" rel="noreferrer noopener">Open in Google Maps</a>
+            </div>
+            <p class="subnote">Enter your address, village, taluka, state, and land size. The preview will center on that place and draw an estimated farm boundary based on your size.</p>
+            <div class="farm-map-layout">
+                <div class="farm-map-frame">
+                    <iframe
+                        id="farmMapFrame"
+                        title="Farm map preview"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        src="https://www.google.com/maps?q=India&output=embed"
+                    ></iframe>
+                    <div class="farm-map-overlay">
+                        <svg id="farmBoundaryOverlay" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                            <rect x="16" y="20" width="68" height="46" rx="2"></rect>
+                        </svg>
+                        <div class="farm-boundary-note" id="farmBoundaryNote">Estimated boundary will appear here after you enter address and farm size.</div>
+                    </div>
+                </div>
+                <div class="farm-map-summary" id="farmMapSummary">
+                    <div class="timeline-item"><p>Add your farm address and size, then click <strong>View Your Farm</strong>.</p></div>
+                </div>
             </div>
         </section>
 

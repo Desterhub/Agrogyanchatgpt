@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroGyanGPT | Cart</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="ui.js"></script>
+    <script defer src="api-config.js"></script>
+    <script defer src="i18n.js"></script>
+    <script defer src="script.js"></script>
+    <script defer src="farmer-pages.js"></script>
+    <script defer src="shop-catalog.js"></script>
+</head>
+<body data-page="cart">
+<div class="page-shell">
+    <header class="top-bar clean-top-bar">
+        <div class="brand-left">
+            <a class="brand-mark clean-brand-mark" href="index.html">AgroGyanGPT</a>
+            <div id="welcomeUser" class="welcome-text">Review your farm cart</div>
+        </div>
+        <div class="top-actions clean-top-actions">
+            <nav class="clean-nav" aria-label="Primary">
+                <a class="clean-nav-link" href="index.html">Home</a>
+                <details class="nav-dropdown">
+                    <summary class="clean-nav-link">Farmer Setup</summary>
+                    <div class="dropdown-panel">
+                        <a href="my-farm.html">My Farm</a>
+                        <a href="crop-care.html">Crop Care</a>
+                        <a href="market.html">Market</a>
+                        <a href="shop.html">Smart Shop</a>
+                    </div>
+                </details>
+                <details class="nav-dropdown">
+                    <summary class="clean-nav-link">More</summary>
+                    <div class="dropdown-panel">
+                        <a href="schemes.html">Schemes</a>
+                        <a href="community.html">Community</a>
+                        <a href="profile.html">Profile</a>
+                    </div>
+                </details>
+            </nav>
+            <div class="header-utility">
+                <select id="uiLanguage" class="lang-select clean-select" aria-label="UI Language">
+                    <option value="English">English</option>
+                    <option value="Hindi">Hindi</option>
+                    <option value="Marathi">Marathi</option>
+                </select>
+                <button id="themeButton" class="nav-btn clean-secondary-btn" type="button" onclick="toggleTheme()">Theme</button>
+                <button id="authButton" class="nav-btn clean-primary-btn" type="button"></button>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero-panel">
+        <div class="hero-copy">
+            <p class="eyebrow">Cart</p>
+            <h1 class="main-title">Review your selected farm inputs before payment.</h1>
+            <p class="subtitle">This page works like a real cart: change quantities, remove products, review totals, then proceed to a dedicated checkout page.</p>
+        </div>
+        <aside class="hero-side">
+            <div class="forecast-card">
+                <span class="meta-label">Cart summary</span>
+                <div class="forecast-temp" id="cartHeroTotal">Rs 0</div>
+                <div id="cartHeroCount" class="hero-status-kicker">0 items selected</div>
+                <p class="hero-status-copy">Review quantities, remove extras, and move to checkout only when the list feels right.</p>
+                <div class="hero-status-list">
+                    <span>Editable item quantities</span>
+                    <span>Live total and order summary</span>
+                    <span>Separate checkout for address and payment</span>
+                </div>
+                <div class="hero-status-actions">
+                    <a class="primary-btn" href="checkout.html">Proceed to Checkout</a>
+                    <a class="nav-btn" href="shop.html">Continue shopping</a>
+                </div>
+            </div>
+        </aside>
+    </section>
+
+    <main class="cart-layout">
+        <section class="post-box">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Your items</p>
+                    <h2 class="section-title">Shopping cart</h2>
+                </div>
+                <div class="shortcut-inline">
+                    <a class="nav-btn" href="shop.html">Continue shopping</a>
+                    <button class="nav-btn" type="button" onclick="clearShopCart()">Clear cart</button>
+                </div>
+            </div>
+            <div id="cartPageItems" class="cart-item-list"></div>
+        </section>
+
+        <aside class="timeline-card cart-summary-panel">
+            <p class="eyebrow">Order summary</p>
+            <h3>Cart totals</h3>
+            <div id="cartSummaryBody" class="timeline-list"></div>
+            <div class="section-header">
+                <a class="nav-btn" href="shop.html">Back to shop</a>
+                <a class="primary-btn" href="checkout.html">Proceed to Checkout</a>
+            </div>
+            <div class="small-note">Checkout page will collect address and payment details in a proper separate flow.</div>
+        </aside>
+    </main>
+</div>
+</body>
+</html>

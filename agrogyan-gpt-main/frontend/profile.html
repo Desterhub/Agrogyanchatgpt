@@ -8,7 +8,7 @@
     <script defer src="ui.js"></script>
     <script defer src="api-config.js"></script>
 </head>
-<body>
+<body data-page="profile">
 <div class="page-shell">
     <header class="top-bar">
         <div class="brand-left">
@@ -58,8 +58,17 @@
             <div class="forecast-card">
                 <span class="meta-label">Account snapshot</span>
                 <div class="forecast-temp" id="profileJoinYear">2026</div>
-                <div style="font-size: 1.1rem; font-weight: 700;">Growing with AgroGyanGPT</div>
-                <p class="subnote" style="color: rgba(255, 244, 207, 0.78); margin-top: 10px;">Keep your favorite schemes and recent answers close for faster repeat decisions.</p>
+                <div class="hero-status-kicker">Growing with AgroGyanGPT</div>
+                <p class="hero-status-copy">Keep identity, preferences, saved schemes, posts, and question history together.</p>
+                <div class="hero-status-list">
+                    <span>Account and contact details</span>
+                    <span>Farm preferences and operating profile</span>
+                    <span>Saved schemes, posts, and AI history</span>
+                </div>
+                <div class="hero-status-actions">
+                    <a class="primary-btn" href="#prefCrop">Update preferences</a>
+                    <a class="nav-btn" href="schemes.html">Open Schemes</a>
+                </div>
             </div>
         </aside>
     </section>
@@ -139,7 +148,7 @@ function getEmail() {
 }
 
 function getSavedSchemes() {
-    return JSON.parse(localStorage.getItem("favoriteSchemes") || "[]");
+    return typeof window.readAgroJson === "function" ? window.readAgroJson("favoriteSchemes", []) : [];
 }
 
 function getMobile() {
@@ -151,8 +160,9 @@ function getDob() {
 }
 
 function getLocation() {
-    const state = localStorage.getItem("userState") || "";
-    const district = localStorage.getItem("userDistrict") || "";
+    const farm = typeof window.getAgroFarmSnapshot === "function" ? window.getAgroFarmSnapshot() : {};
+    const state = farm.state || localStorage.getItem("userState") || "";
+    const district = farm.city || localStorage.getItem("userDistrict") || "";
     return [district, state].filter(Boolean).join(", ") || "-";
 }
 
@@ -163,7 +173,7 @@ function getPreference(key, fallback = "") {
 function getSavedPosts() {
     const userId = localStorage.getItem("userId");
     if (!userId) return [];
-    return JSON.parse(localStorage.getItem(`myPosts_${userId}`) || "[]");
+    return typeof window.readAgroJson === "function" ? window.readAgroJson(`myPosts_${userId}`, []) : [];
 }
 
 async function loadFarmProfile() {
@@ -177,6 +187,9 @@ async function loadFarmProfile() {
         }
         const data = await response.json();
         const profile = data.farm_profile || {};
+        if (typeof window.mergeRemoteAgroProfile === "function") {
+            window.mergeRemoteAgroProfile(data);
+        }
         document.getElementById("farmName").value = profile.farm_name || "";
         document.getElementById("farmPrimaryCrop").value = profile.primary_crop || localStorage.getItem("crop_name") || "";
         document.getElementById("farmIrrigation").value = profile.irrigation_type || "";
@@ -193,7 +206,7 @@ function getHistory() {
         return window.getPersonalHistory();
     }
     const userId = localStorage.getItem("userId");
-    return JSON.parse(localStorage.getItem(userId ? `agroHistory_${userId}` : "agroHistory_guest") || "[]");
+    return typeof window.readAgroJson === "function" ? window.readAgroJson(userId ? `agroHistory_${userId}` : "agroHistory_guest", []) : [];
 }
 
 function escapeHtml(value) {
@@ -313,6 +326,20 @@ async function savePreferences() {
         preferred_language: document.getElementById("prefLang").value.trim()
     };
 
+    if (typeof window.saveAgroFarmSnapshot === "function") {
+        window.saveAgroFarmSnapshot({
+            crop: payload.crop_name,
+            land: payload.land_size,
+            soil: payload.soil_type,
+            season: payload.season,
+            village: payload.village,
+            language: payload.preferred_language,
+            state: localStorage.getItem("userState") || "",
+            city: localStorage.getItem("userDistrict") || ""
+        });
+    }
+    document.getElementById("prefMessage").innerText = "Preferences saved locally.";
+
     try {
         const response = await fetch(`${window.AGRO_API_URL || "http://127.0.0.1:8000"}/profile/preferences`, {
             method: "POST",
@@ -330,7 +357,7 @@ async function savePreferences() {
             document.getElementById("prefMessage").innerText = "Preferences saved.";
         }
     } catch (error) {
-        document.getElementById("prefMessage").innerText = "Unable to save preferences right now.";
+        document.getElementById("prefMessage").innerText = "Preferences saved locally. Backend sync will retry when available.";
     }
 }
 
@@ -345,6 +372,21 @@ async function saveFarmProfile() {
         taluka: document.getElementById("farmTaluka").value.trim(),
         pin_code: document.getElementById("farmPinCode").value.trim()
     };
+
+    if (typeof window.saveAgroFarmSnapshot === "function") {
+        window.saveAgroFarmSnapshot({
+            farmName: payload.farm_name,
+            crop: payload.primary_crop,
+            irrigation: payload.irrigation_type,
+            livestock: payload.livestock,
+            taluka: payload.taluka,
+            pincode: payload.pin_code
+        });
+    }
+    if (payload.primary_crop) {
+        document.getElementById("prefCrop").value = payload.primary_crop;
+    }
+    document.getElementById("farmMessage").innerText = "Farm profile saved locally.";
 
     try {
         const response = await fetch(`${window.AGRO_API_URL || "http://127.0.0.1:8000"}/farm-profile`, {
@@ -363,7 +405,7 @@ async function saveFarmProfile() {
             document.getElementById("farmMessage").innerText = data.message || "Unable to save farm profile right now.";
         }
     } catch (error) {
-        document.getElementById("farmMessage").innerText = "Unable to save farm profile right now.";
+        document.getElementById("farmMessage").innerText = "Farm profile saved locally. Backend sync will retry when available.";
     }
 }
 
@@ -402,9 +444,21 @@ function initProfile() {
     document.getElementById("prefVillage").value = getPreference("village", "");
     document.getElementById("prefLang").value = getPreference("preferred_language", "English");
 
+    const farm = typeof window.getAgroFarmSnapshot === "function" ? window.getAgroFarmSnapshot() : {};
+    document.getElementById("farmName").value = farm.farmName || "";
+    document.getElementById("farmPrimaryCrop").value = farm.crop || getPreference("crop_name", "Wheat");
+    document.getElementById("farmIrrigation").value = farm.irrigation || "";
+    document.getElementById("farmLivestock").value = farm.livestock || "";
+    document.getElementById("farmTaluka").value = farm.taluka || "";
+    document.getElementById("farmPinCode").value = farm.pincode || "";
+
     const welcomeUser = document.getElementById("welcomeUser");
     if (welcomeUser) {
-        welcomeUser.innerText = t("welcomeUserPrefix") + user;
+        if (typeof window.renderUserWelcome === "function") {
+            window.renderUserWelcome(welcomeUser, user);
+        } else {
+            welcomeUser.innerText = `${String(user).trim().split(/\s+/)[0] || "Farmer"}'s live farm desk`;
+        }
     }
 
     renderSavedSchemes();

@@ -1,5 +1,7 @@
 const API_URL = window.AGRO_API_URL || "http://127.0.0.1:8000";
+const PENDING_REGISTRATION_STORAGE_KEY = "agroPendingRegistration";
 let pendingRegistration = null;
+let registerStep = "details";
 
 function showMessage(message, isError = false) {
     const msg = document.getElementById("authMessage");
@@ -56,6 +58,141 @@ function hydrateRecentRegistration() {
     if (emailInput && recentEmail && !emailInput.value) {
         emailInput.value = recentEmail;
     }
+}
+
+function updateRegisterReview(payload = pendingRegistration || collectRegistrationPayload()) {
+    const summary = document.getElementById("registerReviewSummary");
+    if (!summary) return;
+
+    const channelLabel = payload.otp_channel === "whatsapp"
+        ? "WhatsApp OTP"
+        : payload.otp_channel === "manual"
+            ? "Temporary code fallback"
+            : "SMS OTP";
+
+    const parts = [
+        payload.name,
+        payload.email,
+        payload.mobile_number,
+        [payload.district, payload.state].filter(Boolean).join(", "),
+        channelLabel
+    ].filter(Boolean);
+
+    summary.textContent = parts.length
+        ? `We will verify ${parts[0]} using ${channelLabel}. Contact: ${parts[1]} | ${parts[2]} | ${parts[3] || "Location pending"}.`
+        : "Your registration details will appear here before OTP verification.";
+}
+
+function savePendingRegistration(payload, step = registerStep) {
+    if (!payload) return;
+    try {
+        sessionStorage.setItem(PENDING_REGISTRATION_STORAGE_KEY, JSON.stringify({ payload, step }));
+    } catch (error) {
+        console.error("savePendingRegistration error", error);
+    }
+}
+
+function clearPendingRegistrationState() {
+    try {
+        sessionStorage.removeItem(PENDING_REGISTRATION_STORAGE_KEY);
+    } catch (error) {
+        console.error("clearPendingRegistrationState error", error);
+    }
+}
+
+function fillRegistrationForm(payload) {
+    if (!payload) return;
+
+    const fields = {
+        regName: payload.name,
+        regEmail: payload.email,
+        regPassword: payload.password,
+        regMobile: payload.mobile_number,
+        regDob: payload.date_of_birth,
+        regRole: payload.role,
+        regPreferredLanguage: payload.preferred_language,
+        regOtpChannel: payload.otp_channel
+    };
+
+    Object.entries(fields).forEach(([id, value]) => {
+        const field = document.getElementById(id);
+        if (field && value !== undefined && value !== null) {
+            field.value = value;
+        }
+    });
+
+    const state = document.getElementById("regState");
+    const district = document.getElementById("regDistrict");
+    if (state && payload.state) {
+        state.value = payload.state;
+        state.dispatchEvent(new Event("change"));
+    }
+    if (district && payload.district) {
+        district.value = payload.district;
+    }
+}
+
+function restorePendingRegistration() {
+    let saved = null;
+    try {
+        saved = JSON.parse(sessionStorage.getItem(PENDING_REGISTRATION_STORAGE_KEY) || "null");
+    } catch (error) {
+        console.error("restorePendingRegistration parse error", error);
+        clearPendingRegistrationState();
+    }
+
+    if (!saved?.payload) return;
+
+    pendingRegistration = saved.payload;
+    fillRegistrationForm(pendingRegistration);
+    updateRegisterReview(pendingRegistration);
+
+    if (saved.step === "otp") {
+        const modal = document.getElementById("registerModal");
+        if (modal) {
+            modal.classList.remove("hidden");
+        }
+        setRegisterStep("otp");
+        const manualCode = localStorage.getItem("pendingRegistrationManualCode");
+        const message = manualCode
+            ? `Temporary fallback active. Use code ${manualCode} to register now.`
+            : (typeof t === "function" ? t("enterOtpPrompt") : "Enter the 6-digit OTP sent to your phone.");
+        setRegisterMessage(message);
+    }
+}
+
+function setRegisterStep(step) {
+    registerStep = step === "otp" ? "otp" : "details";
+
+    const detailsPanel = document.getElementById("registerStepDetails");
+    const otpPanel = document.getElementById("registerStepOtp");
+    const detailsPill = document.getElementById("stepPillDetails");
+    const otpPill = document.getElementById("stepPillOtp");
+
+    if (detailsPanel) detailsPanel.classList.toggle("hidden", registerStep !== "details");
+    if (otpPanel) otpPanel.classList.toggle("hidden", registerStep !== "otp");
+    if (detailsPill) detailsPill.classList.toggle("active", registerStep === "details");
+    if (otpPill) otpPill.classList.toggle("active", registerStep === "otp");
+
+    if (registerStep === "otp") {
+        updateRegisterReview();
+        savePendingRegistration(pendingRegistration || collectRegistrationPayload(), "otp");
+        const otpInput = document.getElementById("regOtp");
+        if (otpInput) otpInput.focus();
+    } else {
+        if (pendingRegistration) {
+            savePendingRegistration(pendingRegistration, "details");
+        }
+        const firstInput = document.getElementById("regName");
+        if (firstInput) firstInput.focus();
+    }
+}
+
+function goToRegisterStep(step) {
+    if (step === "otp") {
+        updateRegisterReview();
+    }
+    setRegisterStep(step);
 }
 
 function collectRegistrationPayload() {
@@ -137,6 +274,21 @@ async function login() {
             localStorage.setItem("userRole", data.role || "farmer");
             localStorage.setItem("isAdmin", data.role === "admin" ? "yes" : "no");
             localStorage.setItem("phoneVerified", data.phone_verified ? "yes" : "no");
+            if (typeof window.saveAgroFarmSnapshot === "function") {
+                window.saveAgroFarmSnapshot({
+                    crop: data.crop_name || "",
+                    land: data.land_size || "",
+                    soil: data.soil_type || "",
+                    season: data.season || "",
+                    village: data.village || "",
+                    language: data.preferred_language || "",
+                    state: data.state || "",
+                    city: data.district || ""
+                });
+            }
+            if (typeof window.refreshAgroProfileFromServer === "function") {
+                window.refreshAgroProfileFromServer().catch((error) => console.error("login profile refresh error", error));
+            }
             const joinDateKey = getUserStorageKey("joinDate", data.user_id);
             if (!localStorage.getItem(joinDateKey)) {
                 localStorage.setItem(joinDateKey, new Date().toISOString());
@@ -158,7 +310,10 @@ function showRegisterModal() {
     const modal = document.getElementById("registerModal");
     if (!modal) return;
     modal.classList.remove("hidden");
-    clearRegisterForm();
+    if (!pendingRegistration && registerStep === "details") {
+        clearRegisterForm();
+    }
+    setRegisterStep("details");
     setRegisterMessage("");
     const first = document.getElementById("regName");
     if (first) {
@@ -171,6 +326,7 @@ function hideRegisterModal() {
     if (!modal) return;
     modal.classList.add("hidden");
     setRegisterMessage("");
+    setRegisterStep("details");
 }
 
 function setRegisterMessage(message, isError = false) {
@@ -200,7 +356,10 @@ function clearRegisterForm() {
         district.innerHTML = '<option value="">Select district / city</option>';
         district.disabled = true;
     }
+    registerStep = "details";
     pendingRegistration = null;
+    clearPendingRegistrationState();
+    localStorage.removeItem("pendingRegistrationManualCode");
 }
 
 async function sendRegistrationOtp(isResend = false) {
@@ -222,21 +381,26 @@ async function sendRegistrationOtp(isResend = false) {
 
         const data = await response.json();
         if (response.ok && data.otp_session_id) {
-            pendingRegistration = payload;
+            pendingRegistration = { ...payload, otp_channel: data.channel || payload.otp_channel };
+            savePendingRegistration(pendingRegistration, "otp");
             localStorage.setItem("pendingRegistrationEmail", payload.email);
             localStorage.setItem("pendingRegistrationMobile", payload.mobile_number);
-            const debugOtpNote = data.debug_otp ? ` Demo OTP: ${data.debug_otp}` : "";
             const resendText = isResend
                 ? (typeof t === "function" ? t("otpResent") : "OTP resent.")
                 : (typeof t === "function" ? t("otpSent") : "OTP sent.");
             const otpInstruction = typeof t === "function"
                 ? t("otpInstruction")
                 : "Check your phone and enter the 6-digit code.";
-            setRegisterMessage(`${resendText} ${otpInstruction}${debugOtpNote}`);
-            const otpInput = document.getElementById("regOtp");
-            if (otpInput) otpInput.focus();
+            if (data.fallback_mode === "manual" && data.development_otp) {
+                localStorage.setItem("pendingRegistrationManualCode", data.development_otp);
+                setRegisterMessage(`Temporary fallback active. Use code ${data.development_otp} to register now. Phone verification will stay pending until SMS is connected.`);
+            } else {
+                setRegisterMessage(`${resendText} ${otpInstruction}`);
+            }
+            updateRegisterReview(pendingRegistration);
+            setRegisterStep("otp");
         } else {
-            setRegisterMessage(data.message || (typeof t === "function" ? t("unableToSendOtp") : "Unable to send OTP right now."), true);
+            setRegisterMessage(data.detail || data.message || (typeof t === "function" ? t("unableToSendOtp") : "Unable to send OTP right now."), true);
         }
     } catch (err) {
         setRegisterMessage(typeof t === "function" ? t("unableToSendOtp") : "Unable to send OTP right now.", true);
@@ -247,7 +411,19 @@ async function sendRegistrationOtp(isResend = false) {
 }
 
 async function registerUser() {
-    const payload = collectRegistrationPayload();
+    if (registerStep !== "otp") {
+        setRegisterMessage(typeof t === "function" ? t("enterOtpPrompt") : "Enter the 6-digit OTP sent to your phone.", true);
+        setRegisterStep("otp");
+        return;
+    }
+
+    if (!pendingRegistration) {
+        setRegisterMessage(typeof t === "function" ? t("otpInstruction") : "Please send the OTP first, then enter the 6-digit code.", true);
+        setRegisterStep("details");
+        return;
+    }
+
+    const payload = pendingRegistration || collectRegistrationPayload();
     const validationError = validateRegistrationPayload(payload);
     if (validationError) {
         setRegisterMessage(validationError, true);
@@ -270,7 +446,7 @@ async function registerUser() {
                 phone_number: payload.mobile_number,
                 email: payload.email,
                 otp,
-                otp_channel: payload.otp_channel
+                otp_channel: pendingRegistration?.otp_channel || payload.otp_channel
             })
         });
 
@@ -286,18 +462,28 @@ async function registerUser() {
             localStorage.setItem("preferred_language", payload.preferred_language);
             localStorage.setItem("lastRegisteredEmail", payload.email);
             localStorage.setItem("userRole", payload.role);
-            localStorage.setItem("phoneVerified", "yes");
+            localStorage.setItem("phoneVerified", data.phone_verified ? "yes" : "no");
+            if (typeof window.saveAgroFarmSnapshot === "function") {
+                window.saveAgroFarmSnapshot({
+                    language: payload.preferred_language,
+                    state: payload.state,
+                    city: payload.district
+                });
+            }
             if (data.user_id) {
                 localStorage.setItem(getUserStorageKey("joinDate", data.user_id), new Date().toISOString());
             }
+            localStorage.removeItem("pendingRegistrationManualCode");
+            clearPendingRegistrationState();
 
             setRegisterMessage(t("registrationSuccess"));
+            clearRegisterForm();
             hideRegisterModal();
             const loginEmail = document.getElementById("email");
             if (loginEmail) {
                 loginEmail.value = payload.email;
             }
-            window.location.href = "login.html";
+            showMessage(t("registrationSuccess"));
         } else {
             setRegisterMessage(data.message || t("registrationFailed"), true);
         }
@@ -309,5 +495,28 @@ async function registerUser() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", hydrateRecentRegistration);
+function initAuthPage() {
+    hydrateRecentRegistration();
+    restorePendingRegistration();
+
+    const otpInput = document.getElementById("regOtp");
+    if (otpInput) {
+        otpInput.addEventListener("input", () => {
+            otpInput.value = otpInput.value.replace(/\D/g, "").slice(0, 6);
+        });
+        otpInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                registerUser();
+            }
+        });
+    }
+}
+
+document.addEventListener("DOMContentLoaded", initAuthPage);
+window.showRegisterModal = showRegisterModal;
+window.hideRegisterModal = hideRegisterModal;
+window.clearRegisterForm = clearRegisterForm;
+window.goToRegisterStep = goToRegisterStep;
 window.sendRegistrationOtp = sendRegistrationOtp;
+window.registerUser = registerUser;

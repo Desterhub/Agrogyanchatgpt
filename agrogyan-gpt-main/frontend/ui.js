@@ -37,6 +37,136 @@ const INDIA_LOCATIONS = {
     "Puducherry": ["Karaikal", "Mahe", "Puducherry", "Yanam"]
 };
 const ADMIN_EMAIL = "harsh@07gmail.com";
+const AGRO_FARM_STORAGE_KEYS = {
+    crop: "crop_name",
+    land: "land_size",
+    soil: "soil_type",
+    season: "season",
+    village: "village",
+    language: "preferred_language",
+    farmName: "farm_name",
+    irrigation: "farm_irrigation",
+    budget: "farm_budget",
+    taluka: "farm_taluka",
+    streetAddress: "farm_street_address",
+    city: "farm_city",
+    state: "farm_state",
+    pincode: "farm_pincode",
+    livestock: "farm_livestock",
+    lat: "farm_lat",
+    lng: "farm_lng"
+};
+
+function getAgroFarmSnapshot() {
+    const read = (key, fallback = "") => localStorage.getItem(key) || fallback;
+    const state = read("farm_state") || read("userState");
+    const city = read("farm_city") || read("userDistrict");
+    const crop = read("crop_name", "Wheat");
+    const language = read("preferred_language", read("uiLanguage", "English"));
+
+    return {
+        crop,
+        land: read("land_size"),
+        soil: read("soil_type", "Loamy"),
+        season: read("season", "Rabi"),
+        village: read("village"),
+        language,
+        farmName: read("farm_name"),
+        irrigation: read("farm_irrigation"),
+        budget: read("farm_budget"),
+        taluka: read("farm_taluka"),
+        streetAddress: read("farm_street_address"),
+        city,
+        state,
+        pincode: read("farm_pincode"),
+        livestock: read("farm_livestock"),
+        lat: read("farm_lat"),
+        lng: read("farm_lng")
+    };
+}
+
+function readAgroJson(key, fallback) {
+    try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+    } catch (error) {
+        console.error(`Invalid cached JSON for ${key}`, error);
+        localStorage.removeItem(key);
+        return fallback;
+    }
+}
+
+function saveAgroFarmSnapshot(values = {}) {
+    const normalized = {
+        crop: values.crop ?? values.crop_name ?? values.primary_crop,
+        land: values.land ?? values.land_size,
+        soil: values.soil ?? values.soil_type,
+        season: values.season,
+        village: values.village,
+        language: values.language ?? values.preferred_language,
+        farmName: values.farmName ?? values.farm_name,
+        irrigation: values.irrigation ?? values.irrigation_type,
+        budget: values.budget ?? values.season_budget,
+        taluka: values.taluka,
+        streetAddress: values.streetAddress ?? values.street_address,
+        city: values.city ?? values.district,
+        state: values.state,
+        pincode: values.pincode ?? values.pin_code,
+        livestock: values.livestock,
+        lat: values.lat,
+        lng: values.lng
+    };
+
+    Object.entries(AGRO_FARM_STORAGE_KEYS).forEach(([field, storageKey]) => {
+        if (normalized[field] !== undefined && normalized[field] !== null) {
+            localStorage.setItem(storageKey, String(normalized[field]));
+        }
+    });
+
+    if (normalized.state) localStorage.setItem("userState", String(normalized.state));
+    if (normalized.city) localStorage.setItem("userDistrict", String(normalized.city));
+    if (normalized.language) localStorage.setItem("uiLanguage", String(normalized.language));
+
+    window.dispatchEvent(new CustomEvent("agro-farm-profile-updated", { detail: getAgroFarmSnapshot() }));
+    return getAgroFarmSnapshot();
+}
+
+function mergeRemoteAgroProfile(payload = {}) {
+    const profile = payload.profile || {};
+    const farmProfile = payload.farm_profile || {};
+    return saveAgroFarmSnapshot({
+        crop: farmProfile.primary_crop || profile.crop_name,
+        land: profile.land_size,
+        soil: profile.soil_type,
+        season: profile.season,
+        village: profile.village,
+        language: profile.preferred_language,
+        state: profile.state,
+        city: profile.district,
+        farmName: farmProfile.farm_name,
+        irrigation: farmProfile.irrigation_type,
+        livestock: farmProfile.livestock,
+        taluka: farmProfile.taluka,
+        pincode: farmProfile.pin_code,
+        lat: farmProfile.lat,
+        lng: farmProfile.lng
+    });
+}
+
+async function refreshAgroProfileFromServer() {
+    const userId = parseInt(localStorage.getItem("userId") || "0", 10);
+    if (!userId) return getAgroFarmSnapshot();
+
+    const apiBase = window.AGRO_API_URL || "http://127.0.0.1:8000";
+    try {
+        const response = await fetch(`${apiBase}/profile/${userId}`);
+        if (!response.ok) throw new Error(`profile refresh failed: ${response.status}`);
+        return mergeRemoteAgroProfile(await response.json());
+    } catch (error) {
+        console.error("profile refresh error", error);
+        return getAgroFarmSnapshot();
+    }
+}
 
 function isAdminUser() {
     const currentUser = localStorage.getItem("user");
@@ -53,7 +183,120 @@ function goToAdminPanel() {
     window.location.href = "admin.html";
 }
 
+function logout() {
+    [
+        "user",
+        "userId",
+        "userEmail",
+        "userMobile",
+        "userDob",
+        "userState",
+        "userDistrict",
+        "userRole",
+        "isAdmin",
+        "phoneVerified"
+    ].forEach((key) => localStorage.removeItem(key));
+    window.location.href = "login.html";
+}
+
+function getPageKey() {
+    const bodyPage = document.body?.dataset?.page;
+    if (bodyPage) return bodyPage.toLowerCase();
+    const fileName = window.location.pathname.split("/").pop()?.toLowerCase() || "";
+    return fileName.replace(".html", "") || "index";
+}
+
+function escapeAgroText(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function renderUserWelcome(element, user) {
+    if (!element) return;
+    const firstName = String(user || "Farmer").trim().split(/\s+/)[0] || "Farmer";
+    element.innerHTML = `<span class="welcome-live-dot" aria-hidden="true"></span>${escapeAgroText(firstName)}'s live farm desk`;
+}
+
+function getHeaderSubtitle(pageKey) {
+    const subtitles = {
+        home: "Your daily farming control room",
+        index: "Your daily farming control room",
+        "my-farm": "Farm setup and planning",
+        "crop-care": "Crop protection and crop health",
+        market: "Market intelligence and selling tools",
+        "sell-produce": "Farmer produce selling and buying",
+        shop: "Smart buying for your farm inputs",
+        cart: "Review your farm cart",
+        checkout: "Structured payment and checkout",
+        schemes: "Government schemes and support",
+        community: "Farmer community and discussions",
+        profile: "Your farming profile and history",
+        dashboard: "Your daily farming control room"
+    };
+    return subtitles[pageKey] || "Your daily farming control room";
+}
+
+function renderUnifiedHeader() {
+    const body = document.body;
+    const topBar = document.querySelector(".top-bar");
+    if (!body || !topBar) return;
+    if (body.classList.contains("login-page")) return;
+    if (window.location.pathname.toLowerCase().endsWith("admin.html")) return;
+
+    const pageKey = getPageKey();
+    const activeHome = pageKey === "home" || pageKey === "index" || pageKey === "dashboard";
+    const subtitle = getHeaderSubtitle(pageKey);
+    const adminButtonMarkup = isAdminUser()
+        ? `<a id="adminNavButton" class="nav-btn clean-secondary-btn" href="admin.html">Admin Panel</a>`
+        : "";
+
+    topBar.classList.add("clean-top-bar");
+    topBar.innerHTML = `
+        <div class="brand-left">
+            <a class="brand-mark clean-brand-mark brand-home-link" href="index.html" aria-label="Go to home">AgroGyanGPT</a>
+            <div id="welcomeUser" class="welcome-text">${subtitle}</div>
+        </div>
+        <div class="top-actions clean-top-actions">
+            <nav class="clean-nav" aria-label="Primary">
+                <a class="clean-nav-link ${activeHome ? "active" : ""}" href="index.html">Home</a>
+                <details class="nav-dropdown">
+                    <summary class="clean-nav-link">Farmer Setup</summary>
+                    <div class="dropdown-panel">
+                        <a href="my-farm.html">My Farm</a>
+                        <a href="crop-care.html">Crop Care</a>
+                        <a href="market.html">Market</a>
+                        <a href="sell-crops.html">Sell Produce</a>
+                        <a href="shop.html">Smart Shop</a>
+                    </div>
+                </details>
+                <details class="nav-dropdown">
+                    <summary class="clean-nav-link">More</summary>
+                    <div class="dropdown-panel">
+                        <a href="schemes.html">Schemes</a>
+                        <a href="community.html">Community</a>
+                        <a href="profile.html">Profile</a>
+                    </div>
+                </details>
+            </nav>
+            <div class="header-utility">
+                <select id="uiLanguage" class="lang-select clean-select" aria-label="UI Language">
+                    <option value="English">English</option>
+                    <option value="Hindi">Hindi</option>
+                    <option value="Marathi">Marathi</option>
+                </select>
+                <button id="authButton" class="nav-btn clean-primary-btn" type="button" onclick="logout()">Logout</button>
+                ${adminButtonMarkup}
+            </div>
+        </div>
+    `;
+}
+
 function injectAdminNavButton() {
+    if (document.getElementById("adminNavButton")) return;
     if (!isAdminUser()) return;
     if (window.location.pathname.toLowerCase().endsWith("admin.html")) return;
 
@@ -82,13 +325,41 @@ function injectAdminNavButton() {
 }
 
 function prefetchCorePages() {
-    ["index.html", "my-farm.html", "crop-care.html", "market.html", "community.html", "profile.html", "schemes.html", "admin.html"].forEach((href) => {
-        if (document.head.querySelector(`link[rel="prefetch"][href="${href}"]`)) return;
+    const prefetchedPages = new Set();
+
+    const prefetchPage = (href) => {
+        if (!href || href.startsWith("#")) return;
+
+        let target;
+        try {
+            target = new URL(href, window.location.href);
+        } catch (error) {
+            return;
+        }
+
+        if (target.origin !== window.location.origin) return;
+        if (!target.pathname.endsWith(".html") && !target.pathname.endsWith("/")) return;
+
+        target.hash = "";
+        const key = target.href;
+        if (prefetchedPages.has(key)) return;
+        prefetchedPages.add(key);
+
         const link = document.createElement("link");
         link.rel = "prefetch";
-        link.href = href;
+        link.href = key;
         document.head.appendChild(link);
-    });
+    };
+
+    const prefetchFromEvent = (event) => {
+        const link = event.target?.closest?.("a[href]");
+        if (link) prefetchPage(link.getAttribute("href"));
+    };
+
+    document.addEventListener("pointerover", prefetchFromEvent, { passive: true });
+    document.addEventListener("focusin", prefetchFromEvent);
+    document.addEventListener("touchstart", prefetchFromEvent, { passive: true });
+    document.addEventListener("mousedown", prefetchFromEvent);
 }
 
 function populateIndiaLocationSelectors(stateId = "regState", districtId = "regDistrict") {
@@ -243,54 +514,10 @@ function initLoginIntro() {
             console.error("intro video cleanup error", error);
         }
     });
-    return;
-
-    const skipButton = document.getElementById("skipIntroButton");
-    const introDurationMs = 15000;
-    const introFadeMs = 850;
-    let endTimer = null;
-    let cleanupTimer = null;
-
-    const closeIntro = () => {
-        if (intro.classList.contains("is-hidden")) return;
-        intro.classList.add("is-hidden");
-        body.classList.remove("intro-active");
-        body.classList.add("intro-complete");
-        intro.setAttribute("aria-hidden", "true");
-        intro.querySelectorAll("video").forEach((video) => {
-            try {
-                video.pause();
-            } catch (error) {
-                console.error("intro video pause error", error);
-            }
-        });
-
-        if (endTimer) {
-            clearTimeout(endTimer);
-            endTimer = null;
-        }
-
-        if (cleanupTimer) {
-            clearTimeout(cleanupTimer);
-        }
-        cleanupTimer = window.setTimeout(() => {
-            intro.style.display = "none";
-        }, introFadeMs);
-    };
-
-    intro.setAttribute("aria-hidden", "false");
-    intro.classList.remove("is-hidden");
-    intro.style.display = "";
-    body.classList.remove("intro-complete");
-    body.classList.add("intro-active");
-    endTimer = window.setTimeout(closeIntro, introDurationMs);
-
-    if (skipButton) {
-        skipButton.addEventListener("click", closeIntro);
-    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    renderUnifiedHeader();
     populateIndiaLocationSelectors();
     initLoginIntro();
     injectAssistantOrb();
@@ -305,3 +532,10 @@ window.applyAmbientTheme = applyAmbientTheme;
 window.initLoginIntro = initLoginIntro;
 window.isAdminUser = isAdminUser;
 window.goToAdminPanel = goToAdminPanel;
+window.logout = logout;
+window.readAgroJson = readAgroJson;
+window.getAgroFarmSnapshot = getAgroFarmSnapshot;
+window.saveAgroFarmSnapshot = saveAgroFarmSnapshot;
+window.mergeRemoteAgroProfile = mergeRemoteAgroProfile;
+window.refreshAgroProfileFromServer = refreshAgroProfileFromServer;
+window.renderUserWelcome = renderUserWelcome;

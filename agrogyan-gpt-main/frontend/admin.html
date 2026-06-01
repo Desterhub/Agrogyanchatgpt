@@ -50,8 +50,17 @@
             <div class="forecast-card">
                 <span class="meta-label">Admin access</span>
                 <div class="forecast-temp">LIVE</div>
-                <div id="adminHealthHeadline" style="font-size: 1.1rem; font-weight: 700;">Loading platform health...</div>
-                <p id="adminHealthNote" class="subnote" style="color: rgba(255, 244, 207, 0.78); margin-top: 10px;">Checking user activity and engagement signals.</p>
+                <div id="adminHealthHeadline" class="hero-status-kicker">Loading platform health...</div>
+                <p id="adminHealthNote" class="hero-status-copy">Checking user activity and engagement signals.</p>
+                <div class="hero-status-list">
+                    <span>User, question, and community metrics</span>
+                    <span>Orders, revenue, and commerce readiness</span>
+                    <span>Exportable analytics for startup demos</span>
+                </div>
+                <div class="hero-status-actions">
+                    <a class="primary-btn" href="#adminOrdersList">Review orders</a>
+                    <button class="nav-btn" type="button" onclick="downloadAnalyticsCsv()">Download CSV</button>
+                </div>
             </div>
         </aside>
     </section>
@@ -133,6 +142,48 @@
                 <div class="timeline-item"><h4>Regional focus</h4><p>Identify high-activity districts for pilot programs, partnerships, and on-ground demos.</p></div>
                 <div class="timeline-item"><h4>Engagement signals</h4><p>Use AI question count and community usage as early traction proof during startup demos.</p></div>
             </div>
+        </div>
+    </div>
+
+    <div class="dashboard-widgets">
+        <div class="timeline-card admin-spotlight">
+            <p class="eyebrow">Shop orders</p>
+            <h3>Local commerce flow</h3>
+            <div id="adminOrderSummary" class="timeline-list"></div>
+        </div>
+
+        <div class="timeline-card admin-spotlight">
+            <p class="eyebrow">Order queue</p>
+            <h3>Incoming farmer orders</h3>
+            <div id="adminOrdersList" class="timeline-list"></div>
+        </div>
+
+        <div class="timeline-card admin-spotlight">
+            <p class="eyebrow">Commerce notes</p>
+            <h3>What to connect next</h3>
+            <div class="timeline-list">
+                <div class="timeline-item"><h4>Seller routing</h4><p>Assign each order to the nearest seller or inventory node.</p></div>
+                <div class="timeline-item"><h4>Payment verification</h4><p>Connect COD, UPI, and card flow to backend order status updates.</p></div>
+                <div class="timeline-item"><h4>Dispatch tracking</h4><p>Show packed, shipped, and delivered states to farmers and admins.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-widgets">
+        <div class="timeline-card admin-spotlight">
+            <p class="eyebrow">Inventory visibility</p>
+            <h3>Catalog and stock snapshot</h3>
+            <div id="adminInventorySummary" class="timeline-list"></div>
+        </div>
+        <div class="timeline-card admin-spotlight">
+            <p class="eyebrow">Top demand products</p>
+            <h3>Wishlist and compare signals</h3>
+            <div id="adminProductDemand" class="timeline-list"></div>
+        </div>
+        <div class="timeline-card admin-spotlight">
+            <p class="eyebrow">Operations mode</p>
+            <h3>Low-network readiness</h3>
+            <div id="adminOfflineReadiness" class="timeline-list"></div>
         </div>
     </div>
 </div>
@@ -238,6 +289,135 @@ function renderSnapshot(data) {
         <div class="timeline-item"><h4>Generated</h4><p>${new Date(data.generated_at).toLocaleString()}</p></div>
         <div class="timeline-item"><h4>Verified adoption</h4><p>${data.metrics?.verified_users ?? 0} verified users in this view.</p></div>
     `;
+}
+
+function loadLocalShopOrders() {
+    const orders = typeof window.readAgroJson === "function" ? window.readAgroJson("agroShopOrders", []) : [];
+    const summary = document.getElementById("adminOrderSummary");
+    const orderList = document.getElementById("adminOrdersList");
+    const totalValue = orders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+
+    if (summary) {
+        summary.innerHTML = orders.length
+            ? `
+                <div class="timeline-item"><h4>Total shop orders</h4><p>${orders.length}</p></div>
+                <div class="timeline-item"><h4>Estimated GMV</h4><p>Rs ${Math.round(totalValue).toLocaleString("en-IN")}</p></div>
+                <div class="timeline-item"><h4>Latest payment mode</h4><p>${orders[0].payment_method || "COD"}</p></div>
+            `
+            : `<div class="timeline-item"><p>No local shop orders yet. Checkout from Smart Shop to see orders here.</p></div>`;
+    }
+
+    if (orderList) {
+        orderList.innerHTML = orders.length
+            ? orders.map((order) => `
+                <div class="timeline-item">
+                    <h4>${order.id}</h4>
+                    <p>${order.customer_name || "Farmer"} | ${order.customer_phone || "No phone"}</p>
+                    <p>${order.delivery_address || "No address saved"}</p>
+                    <p>${order.items}</p>
+                    <p>Rs ${Math.round(Number(order.total) || 0).toLocaleString("en-IN")} | ${order.payment_method || "COD"}</p>
+                    <p>${order.status || "Order created"}</p>
+                </div>
+            `).join("")
+            : `<div class="timeline-item"><p>No local shop orders yet.</p></div>`;
+    }
+}
+
+function loadLocalInventorySignals() {
+    const catalog = typeof window.readAgroJson === "function" ? window.readAgroJson("agroShopProductCache", []) : [];
+    const wishlist = typeof window.readAgroJson === "function" ? window.readAgroJson("agroShopWishlist", []) : [];
+    const compare = typeof window.readAgroJson === "function" ? window.readAgroJson("agroShopCompare", []) : [];
+    const dashboardCache = typeof window.readAgroJson === "function" ? window.readAgroJson("agroDashboardCache", null) : null;
+    const inventorySummary = document.getElementById("adminInventorySummary");
+    const productDemand = document.getElementById("adminProductDemand");
+    const offlineReadiness = document.getElementById("adminOfflineReadiness");
+
+    if (inventorySummary) {
+        inventorySummary.innerHTML = catalog.length ? `
+            <div class="timeline-item"><h4>Catalog size</h4><p>${catalog.length} locally cached products</p></div>
+            <div class="timeline-item"><h4>Stock posture</h4><p>Front-end demo inventory is visible. Real stock sync can connect next.</p></div>
+            <div class="timeline-item"><h4>Category spread</h4><p>${[...new Set(catalog.map((item) => item.category))].length} product categories active</p></div>
+        ` : `<div class="timeline-item"><p>No local product cache yet. Open Smart Shop once to populate inventory preview.</p></div>`;
+    }
+
+    if (productDemand) {
+        productDemand.innerHTML = `
+            <div class="timeline-item"><h4>Wishlist saves</h4><p>${wishlist.length} product(s) saved by the current farmer profile</p></div>
+            <div class="timeline-item"><h4>Compare shortlist</h4><p>${compare.length} product(s) in compare mode</p></div>
+            <div class="timeline-item"><h4>Demand signal</h4><p>Wishlist and compare actions can become top-demand inputs for admin ranking later.</p></div>
+        `;
+    }
+
+    if (offlineReadiness) {
+        offlineReadiness.innerHTML = `
+            <div class="timeline-item"><h4>Farm profile cache</h4><p>${localStorage.getItem("crop_name") ? "Available for offline-first experience" : "Needs farmer setup"}</p></div>
+            <div class="timeline-item"><h4>Dashboard cache</h4><p>${dashboardCache?.cached_at ? new Date(dashboardCache.cached_at).toLocaleString() : "No cached dashboard payload yet"}</p></div>
+            <div class="timeline-item"><h4>Local mode</h4><p>Cart, wishlist, compare, alerts, and orders are ready even with weak network.</p></div>
+        `;
+    }
+}
+
+async function loadCommerceOverview() {
+    const email = localStorage.getItem("userEmail") || "";
+    const inventorySummary = document.getElementById("adminInventorySummary");
+    const productDemand = document.getElementById("adminProductDemand");
+    const offlineReadiness = document.getElementById("adminOfflineReadiness");
+    const orderList = document.getElementById("adminOrdersList");
+
+    try {
+        const response = await fetch(`${API_URL}/admin/commerce-overview?user_email=${encodeURIComponent(email)}`);
+        if (!response.ok) {
+            throw new Error(`commerce overview failed: ${response.status}`);
+        }
+        const data = await response.json();
+
+        if (inventorySummary) {
+            inventorySummary.innerHTML = (data.inventory || []).slice(0, 6).map((item) => `
+                <div class="timeline-item">
+                    <h4>${item.product_name}</h4>
+                    <p>${item.stock_count} in stock | ${item.seller || "Seller pending"}</p>
+                    <p>${item.price ? `Rs ${item.price}` : "Price not synced"} | Updated ${new Date(item.updated_at).toLocaleString()}</p>
+                </div>
+            `).join("") || `<div class="timeline-item"><p>No shared inventory data yet.</p></div>`;
+        }
+
+        if (productDemand) {
+            productDemand.innerHTML = (data.demand || []).slice(0, 6).map((item) => `
+                <div class="timeline-item">
+                    <h4>${item.product_name}</h4>
+                    <p>${item.count} shared demand signal(s) across users</p>
+                </div>
+            `).join("") || `<div class="timeline-item"><p>No multi-user demand signals yet.</p></div>`;
+        }
+
+        if (offlineReadiness) {
+            const liveStatus = typeof window.readAgroJson === "function" ? window.readAgroJson("agroLiveFeedStatus", null) : null;
+            offlineReadiness.innerHTML = `
+                <div class="timeline-item"><h4>Weather feed</h4><p>${liveStatus?.weather?.source || "Not synced on this device yet"}</p></div>
+                <div class="timeline-item"><h4>Market feed</h4><p>${liveStatus?.market?.source || "Not synced on this device yet"}</p></div>
+                <div class="timeline-item"><h4>Fallback mode</h4><p>Frontend local cache still stays active for weak-network browsing and cart actions.</p></div>
+            `;
+        }
+
+        if (orderList) {
+            orderList.innerHTML = (data.orders || []).length
+                ? data.orders.map((order) => `
+                    <div class="timeline-item">
+                        <h4>${order.order_code}</h4>
+                        <p>${order.customer_name || "Farmer"} | ${order.customer_phone || "No phone"}</p>
+                        <p>${order.delivery_address || "No address saved"}</p>
+                        <p>${order.items}</p>
+                        <p>Rs ${Math.round(Number(order.total) || 0).toLocaleString("en-IN")} | ${order.payment_method || "COD"}</p>
+                        <p>${order.status || "Order created"}</p>
+                    </div>
+                `).join("")
+                : `<div class="timeline-item"><p>No shared shop orders yet.</p></div>`;
+        }
+    } catch (error) {
+        console.error(error);
+        loadLocalInventorySignals();
+        loadLocalShopOrders();
+    }
 }
 
 function changeTimeframe(button) {
@@ -360,6 +540,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const authButton = document.getElementById("authButton");
     if (authButton) authButton.onclick = logout;
     loadAdminAnalytics();
+    loadLocalShopOrders();
+    loadLocalInventorySignals();
+    loadCommerceOverview();
 });
 
 window.changeTimeframe = changeTimeframe;

@@ -1,9 +1,11 @@
 // ===============================
 // FORCE VOICE LOADING
 // ===============================
-window.speechSynthesis.onvoiceschanged = () => {
-    speechSynthesis.getVoices();
-};
+if (window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+    };
+}
 
 const API_URL = window.AGRO_API_URL || "http://127.0.0.1:8000";
 
@@ -14,6 +16,10 @@ function getCurrentUserId() {
 function getHistoryStorageKey() {
     const userId = getCurrentUserId();
     return userId ? `agroHistory_${userId}` : "agroHistory_guest";
+}
+
+function readCachedJson(key, fallback) {
+    return typeof window.readAgroJson === "function" ? window.readAgroJson(key, fallback) : fallback;
 }
 
 function escapeHtml(value) {
@@ -148,6 +154,12 @@ function normalizeRecommendationText(answer) {
     return text.replace(/^result\s*:\s*/i, "").trim();
 }
 
+function getMainAnswerForSpeech(answer) {
+    const normalized = normalizeRecommendationText(answer);
+    const [mainAnswer] = normalized.split(/\n\s*\n\s*(?:How to use this answer:|References:|Related questions:)/i);
+    return (mainAnswer || normalized).trim();
+}
+
 function updateAnswerPresentation(answer) {
     const answerBox = document.getElementById("answer");
     const answerIntro = document.getElementById("answerIntro");
@@ -212,8 +224,10 @@ function calculateDecisionMetrics(crop, location, budget) {
 }
 
 function populateDecisionDefaults() {
-    const storedCrop = localStorage.getItem("crop_name") || "Tomato";
-    const storedLocation = [localStorage.getItem("userDistrict"), localStorage.getItem("userState")].filter(Boolean).join(", ") || "Maharashtra";
+    const farm = typeof window.getAgroFarmSnapshot === "function" ? window.getAgroFarmSnapshot() : {};
+    const storedCrop = farm.crop || localStorage.getItem("crop_name") || "Tomato";
+    const storedLocation = [farm.city || localStorage.getItem("userDistrict"), farm.state || localStorage.getItem("userState")].filter(Boolean).join(", ") || "Maharashtra";
+    const storedBudget = farm.budget || localStorage.getItem("farm_budget") || "50000";
     const profitCrop = document.getElementById("profitCrop");
     const decisionCrop = document.getElementById("decisionCrop");
     const decisionLocation = document.getElementById("decisionLocation");
@@ -227,11 +241,11 @@ function populateDecisionDefaults() {
     if (profitCrop) profitCrop.value = storedCrop;
     if (decisionCrop) decisionCrop.value = storedCrop;
     if (decisionLocation && !decisionLocation.value) decisionLocation.value = storedLocation;
-    if (profitInvestment && !profitInvestment.value) profitInvestment.value = "50000";
-    if (decisionBudget && !decisionBudget.value) decisionBudget.value = "50000";
+    if (profitInvestment && !profitInvestment.value) profitInvestment.value = storedBudget;
+    if (decisionBudget && !decisionBudget.value) decisionBudget.value = storedBudget;
     if (compareOne) compareOne.value = storedCrop;
     if (compareTwo && !compareTwo.value) compareTwo.value = "Onion";
-    if (compareBudget && !compareBudget.value) compareBudget.value = "50000";
+    if (compareBudget && !compareBudget.value) compareBudget.value = storedBudget;
     if (apiKeyInput) apiKeyInput.value = localStorage.getItem("googleMapsApiKey") || "";
 }
 
@@ -358,8 +372,9 @@ function setEcosystemType(button) {
 }
 
 function getSelectedMapQuery() {
-    const state = document.getElementById("mapState")?.value || localStorage.getItem("userState") || "Maharashtra";
-    const district = document.getElementById("mapDistrict")?.value || localStorage.getItem("userDistrict") || "Pune";
+    const farm = typeof window.getAgroFarmSnapshot === "function" ? window.getAgroFarmSnapshot() : {};
+    const state = document.getElementById("mapState")?.value || farm.state || localStorage.getItem("userState") || "Maharashtra";
+    const district = document.getElementById("mapDistrict")?.value || farm.city || farm.village || localStorage.getItem("userDistrict") || "Pune";
     const custom = document.getElementById("mapCustomSearch")?.value.trim();
     return custom || [district, state].filter(Boolean).join(", ");
 }
@@ -503,12 +518,12 @@ async function loadNearbyEcosystemMap() {
 
 function getPersonalHistory() {
     const scopedKey = getHistoryStorageKey();
-    const scopedHistory = JSON.parse(localStorage.getItem(scopedKey) || "[]");
+    const scopedHistory = readCachedJson(scopedKey, []);
     if (scopedHistory.length) {
         return scopedHistory;
     }
 
-    const legacyHistory = JSON.parse(localStorage.getItem("agroHistory") || "[]");
+    const legacyHistory = readCachedJson("agroHistory", []);
     if (legacyHistory.length) {
         localStorage.setItem(scopedKey, JSON.stringify(legacyHistory.slice(0, 30)));
         localStorage.removeItem("agroHistory");
@@ -558,7 +573,23 @@ async function askQuestion() {
         }
 
         const data = await response.json();
-        const formattedAnswer = updateAnswerPresentation(data.answer || "No answer found.");
+        const extraSections = [];
+        if (Array.isArray(data.references) && data.references.length) {
+            extraSections.push(
+                "References:\n" + data.references.map((item) => {
+                    const statePart = item.state ? ` | ${item.state}` : "";
+                    const sectionPart = item.section ? ` | ${item.section}` : "";
+                    return `[${item.index}] ${item.title}${statePart}${sectionPart}`;
+                }).join("\n")
+            );
+        }
+        if (Array.isArray(data.follow_up_questions) && data.follow_up_questions.length) {
+            extraSections.push(
+                "Related questions:\n" + data.follow_up_questions.map((item, index) => `${index + 1}. ${item}`).join("\n")
+            );
+        }
+        const answerWithContext = [data.answer || "No answer found.", ...extraSections].filter(Boolean).join("\n\n");
+        const formattedAnswer = updateAnswerPresentation(answerWithContext);
 
         if (data.confidence !== undefined && confidenceBox) {
             confidenceBox.innerText = `${t("confidence")} ${(data.confidence * 100).toFixed(0)}%`;
@@ -572,7 +603,8 @@ async function askQuestion() {
         });
 
         renderHistory();
-        speakText(`Based on your query and soil conditions, I recommend ${formattedAnswer}`, language);
+        const spokenAnswer = getMainAnswerForSpeech(data.answer || formattedAnswer);
+        speakText(`Based on your query and soil conditions, I recommend ${spokenAnswer}`, language);
     } catch (error) {
         hideAnswerIntro();
         answerBox.innerText = t("backendNotReachable");
@@ -689,15 +721,39 @@ function replayHistory(ts) {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    if (typeof initI18n === "function") {
-        initI18n();
+    try {
+        if (typeof initI18n === "function") {
+            initI18n();
+        }
+    } catch (error) {
+        console.error("script i18n init error", error);
     }
-    populateDecisionDefaults();
-    runProfitCalculator();
-    runDecisionEngine();
-    runCompareDecisions();
-    handleExpertConnect("free");
-    renderHistory();
+
+    [
+        () => populateDecisionDefaults(),
+        () => runProfitCalculator(),
+        () => runDecisionEngine(),
+        () => runCompareDecisions(),
+        () => handleExpertConnect("free"),
+        () => renderHistory()
+    ].forEach((task) => {
+        try {
+            task();
+        } catch (error) {
+            console.error("script startup error", error);
+        }
+    });
+});
+
+window.addEventListener("agro-farm-profile-updated", () => {
+    try {
+        populateDecisionDefaults();
+        runProfitCalculator();
+        runDecisionEngine();
+        runCompareDecisions();
+    } catch (error) {
+        console.error("farm profile refresh error", error);
+    }
 });
 
 // ===============================

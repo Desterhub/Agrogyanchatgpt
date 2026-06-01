@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroGyanGPT | Smart Shop</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="ui.js"></script>
+    <script defer src="api-config.js"></script>
+    <script defer src="i18n.js"></script>
+    <script defer src="script.js"></script>
+    <script defer src="farmer-pages.js"></script>
+    <script defer src="shop-catalog.js"></script>
+</head>
+<body data-page="shop">
+<div class="page-shell">
+    <header class="top-bar clean-top-bar">
+        <div class="brand-left">
+            <a class="brand-mark clean-brand-mark" href="index.html">AgroGyanGPT</a>
+            <div id="welcomeUser" class="welcome-text">Smart buying for your farm inputs</div>
+        </div>
+        <div class="top-actions clean-top-actions">
+            <nav class="clean-nav" aria-label="Primary">
+                <a class="clean-nav-link" href="index.html">Home</a>
+                <details class="nav-dropdown">
+                    <summary class="clean-nav-link">Farmer Setup</summary>
+                    <div class="dropdown-panel">
+                        <a href="my-farm.html">My Farm</a>
+                        <a href="crop-care.html">Crop Care</a>
+                        <a href="market.html">Market</a>
+                        <a href="shop.html">Smart Shop</a>
+                    </div>
+                </details>
+                <details class="nav-dropdown">
+                    <summary class="clean-nav-link">More</summary>
+                    <div class="dropdown-panel">
+                        <a href="schemes.html">Schemes</a>
+                        <a href="community.html">Community</a>
+                        <a href="profile.html">Profile</a>
+                    </div>
+                </details>
+            </nav>
+            <div class="header-utility">
+                <select id="uiLanguage" class="lang-select clean-select" aria-label="UI Language">
+                    <option value="English">English</option>
+                    <option value="Hindi">Hindi</option>
+                    <option value="Marathi">Marathi</option>
+                </select>
+                <button id="themeButton" class="nav-btn clean-secondary-btn" type="button" onclick="toggleTheme()">Theme</button>
+                <button id="authButton" class="nav-btn clean-primary-btn" type="button"></button>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero-panel shop-hero">
+        <div class="hero-copy">
+            <div class="page-signature page-signature-shop">Decision commerce for Indian farms</div>
+            <p class="eyebrow">Smart farm shop</p>
+            <h1 class="main-title">Browse farm inputs in a faster, more compact shop view.</h1>
+            <p class="subtitle">See more products in one screen, update cart items without leaving this page, and move to checkout only when your shortlist is ready.</p>
+            <div class="voice-workflow-strip compact-workflow-strip">
+                <span class="workflow-label">Shop assistant</span>
+                <button class="nav-btn workflow-btn" type="button" onclick="setExperienceLanguage('English')">English</button>
+                <button class="nav-btn workflow-btn" type="button" onclick="setExperienceLanguage('Hindi')">Hindi</button>
+                <button class="nav-btn workflow-btn" type="button" onclick="setExperienceLanguage('Marathi')">Marathi</button>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-card"><span class="stat-label">Primary crop</span><span class="stat-value" id="shopPrimaryCrop">-</span></div>
+                <div class="stat-card"><span class="stat-label">Land size</span><span class="stat-value" id="shopLandNeed">-</span></div>
+                <div class="stat-card"><span class="stat-label">Cart items</span><span class="stat-value" id="shopCartCount">0</span></div>
+            </div>
+        </div>
+        <aside class="hero-side">
+            <div class="forecast-card">
+                <span class="meta-label">Quick flow</span>
+                <div class="forecast-temp">SHOP</div>
+                <div class="hero-status-kicker">Category to products to cart to checkout</div>
+                <p class="hero-status-copy">A compact buying flow for seeds, nutrition, crop protection, tools, and machinery.</p>
+                <div class="hero-status-list">
+                    <span>Category filters and product search</span>
+                    <span>Wishlist, compare, and inline cart editor</span>
+                    <span>One-click farm kit for quick ordering</span>
+                </div>
+                <div class="hero-status-actions">
+                    <a class="primary-btn" href="#shopCategoryGrid">Browse categories</a>
+                    <a class="nav-btn" href="cart.html">Open Cart</a>
+                </div>
+            </div>
+        </aside>
+    </section>
+
+    <section class="timeline-card shop-top-strip">
+        <div class="shop-top-strip-copy">
+            <p class="eyebrow">Cart pulse</p>
+            <h3 id="shopTopSignal">Loading your cart...</h3>
+            <p id="shopTopSignalNote" class="subnote">Visible products appear below as soon as you choose a category or search.</p>
+        </div>
+        <div class="shop-top-strip-actions">
+            <div class="decision-metric compact-summary-card">
+                <span class="metric-label">Estimated total</span>
+                <strong id="shopCartTotal">Rs 0</strong>
+            </div>
+            <div class="decision-metric compact-summary-card">
+                <span class="metric-label">Items</span>
+                <strong id="shopCartItemCount">0</strong>
+            </div>
+            <button class="nav-btn" type="button" onclick="clearShopCart()">Reset cart</button>
+            <a class="nav-btn" href="cart.html">Open Cart</a>
+            <a class="primary-btn" href="checkout.html">Go to Checkout</a>
+        </div>
+    </section>
+
+    <main class="community-container">
+        <section class="timeline-card">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Categories</p>
+                    <h3>Start from what you want to buy</h3>
+                </div>
+                <button class="nav-btn" type="button" onclick="clearShopFilters()">View all</button>
+            </div>
+            <div id="shopCategoryGrid" class="shop-category-grid"></div>
+        </section>
+
+        <section class="shop-browser-layout">
+            <aside class="timeline-card shop-filter-panel">
+                <p class="eyebrow">Filters</p>
+                <h3>Refine products</h3>
+                <div class="decision-form-grid shop-filter-form">
+                    <label>
+                        <span>Category</span>
+                        <select id="shopCategoryFilter" onchange="filterShopProducts()">
+                            <option value="all">All products</option>
+                            <option value="seed">Seeds</option>
+                            <option value="fertilizer">Fertilizers</option>
+                            <option value="nutrition">Crop nutrition</option>
+                            <option value="protection">Crop protection</option>
+                            <option value="irrigation">Irrigation</option>
+                            <option value="machinery">Farm machinery</option>
+                            <option value="animal">Animal husbandry</option>
+                            <option value="garden">Garden tools</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span>Search</span>
+                        <input id="shopSearchInput" type="text" placeholder="Tomato, brinjal, urea, sprayer..." oninput="filterShopProducts()">
+                    </label>
+                </div>
+                <div class="shop-filter-actions">
+                    <button class="nav-btn" type="button" onclick="clearShopFilters()">Reset filters</button>
+                </div>
+                <div id="shopFilterHelp" class="timeline-list"></div>
+
+                <div class="shop-inline-cart-card">
+                    <div class="section-header">
+                        <div>
+                            <p class="eyebrow">Cart editor</p>
+                            <h3 id="shopPreviewTitle">Your selected items</h3>
+                        </div>
+                        <span class="badge-chip active" id="shopInlineCartCount">0 items</span>
+                    </div>
+                    <div id="shopCartBody" class="shop-inline-cart-list"></div>
+                    <div class="shop-inline-cart-footer">
+                        <p id="shopCheckoutMessage" class="subnote">Add products and edit the cart here itself.</p>
+                        <div class="shop-inline-cart-actions">
+                            <button class="nav-btn" type="button" onclick="clearShopCart()">Reset cart</button>
+                            <a class="primary-btn" href="checkout.html">Checkout</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="shop-inline-cart-card">
+                    <div class="section-header">
+                        <div>
+                            <p class="eyebrow">Wishlist</p>
+                            <h3>Saved products</h3>
+                        </div>
+                        <span class="badge-chip active" id="shopWishlistCount">0 saved</span>
+                    </div>
+                    <div id="shopWishlistBody" class="shop-inline-cart-list"></div>
+                </div>
+
+                <div class="shop-inline-cart-card">
+                    <div class="section-header">
+                        <div>
+                            <p class="eyebrow">Compare</p>
+                            <h3>Product shortlist</h3>
+                        </div>
+                        <span class="badge-chip active" id="shopCompareCount">0 selected</span>
+                    </div>
+                    <div id="shopCompareBody" class="shop-inline-cart-list"></div>
+                </div>
+
+                <div class="timeline-item shop-price-note">
+                    <h4>Price note</h4>
+                    <p id="shopPriceStatus">Prices currently use locally stored sample values. They are not connected to live market rates yet.</p>
+                </div>
+            </aside>
+
+            <section class="post-box">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Products</p>
+                        <h2 class="section-title">Visible products for this selection</h2>
+                    </div>
+                    <div class="shortcut-inline">
+                        <span class="badge-chip active" id="shopFilterResult">All products</span>
+                        <button class="nav-btn" type="button" onclick="addRecommendedBundle()">One-click farm kit</button>
+                        <a class="nav-btn" href="cart.html">View cart</a>
+                        <button class="nav-btn" type="button" onclick="clearShopCart()">Reset cart</button>
+                    </div>
+                </div>
+                <div id="shopEmptyState" class="timeline-list"></div>
+                <div id="shopProductGrid" class="shop-product-grid shop-product-grid-wide"></div>
+                <div id="shopPagination" class="shop-pagination"></div>
+            </section>
+        </section>
+    </main>
+</div>
+
+<div id="shopProductModal" class="modal-overlay hidden">
+    <div class="modal-card shop-modal-card">
+        <div class="section-header">
+            <div>
+                <p class="eyebrow">Product details</p>
+                <h3 id="shopModalTitle">Product</h3>
+            </div>
+            <button class="nav-btn" type="button" onclick="closeShopProductModal()">Close</button>
+        </div>
+        <div class="shop-modal-layout">
+            <div id="shopModalImage" class="shop-modal-image"></div>
+            <div class="shop-modal-copy">
+                <div id="shopModalMeta" class="shop-product-meta"></div>
+                <div id="shopModalDescription" class="timeline-list"></div>
+                <div id="shopModalAdvice" class="timeline-list"></div>
+                <div class="section-header">
+                    <button id="shopModalAddButton" class="primary-btn" type="button">Add to cart</button>
+                    <a class="nav-btn" href="cart.html">Go to Cart</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+window.addEventListener("load", function () {
+    setTimeout(function () {
+        if (typeof window.initShopFallbackCatalog === "function") {
+            window.initShopFallbackCatalog();
+        }
+    }, 1200);
+});
+</script>
+</body>
+</html>

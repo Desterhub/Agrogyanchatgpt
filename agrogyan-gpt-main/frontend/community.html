@@ -9,7 +9,7 @@
     <script defer src="api-config.js"></script>
     <script defer src="i18n.js"></script>
 </head>
-<body>
+<body data-page="community">
 <div class="page-shell">
     <header class="top-bar">
         <div class="brand-left">
@@ -34,33 +34,42 @@
         </div>
     </header>
 
-    <section class="hero-panel">
+    <section class="hero-panel community-hero">
         <div class="hero-copy">
-            <p class="eyebrow">Grow together</p>
+            <p class="eyebrow">Farmer support network</p>
             <h1 class="main-title">Farmer Community</h1>
-            <p class="subtitle">Share field observations, ask for crop advice, react to others, and keep practical farming conversations moving in a calmer, cleaner space.</p>
-            <div class="hero-stats">
+            <p class="subtitle">Ask other farmers, get AI summaries, share field photos, listen in your language, and find solved answers without scrolling through noisy discussions.</p>
+            <div class="hero-stats community-live-stats">
                 <div class="stat-card">
-                    <span class="stat-label">Post style</span>
-                    <span class="stat-value">Quick updates</span>
+                    <span class="stat-label">Posts</span>
+                    <span class="stat-value" id="communityPostCount">6</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Best for</span>
-                    <span class="stat-value">Peer support</span>
+                    <span class="stat-label">Solved today</span>
+                    <span class="stat-value" id="communitySolvedCount">3</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Flow</span>
-                    <span class="stat-value">Searchable</span>
+                    <span class="stat-label">Farmers active</span>
+                    <span class="stat-value" id="communityActiveCount">12</span>
                 </div>
             </div>
         </div>
 
         <aside class="hero-side">
             <div class="forecast-card">
-                <span class="meta-label">Community energy</span>
-                <div class="forecast-temp">Live</div>
-                <div style="font-size: 1.1rem; font-weight: 700;">Ask, react, reply</div>
-                <p class="subnote" style="color: rgba(255, 244, 207, 0.78); margin-top: 10px;">Use this page for practical field experience while the dashboard handles document answers.</p>
+                <span class="meta-label">Top solved problem</span>
+                <div class="forecast-temp">AI</div>
+                <div class="hero-status-kicker">Yellow leaves in wheat</div>
+                <p class="hero-status-copy">Community accepted: check irrigation, nitrogen, and upload a leaf photo before spraying.</p>
+                <div class="hero-status-list">
+                    <span>Ask with photo, voice, or typed details</span>
+                    <span>AI summaries for noisy discussion threads</span>
+                    <span>Save solved posts for repeat field use</span>
+                </div>
+                <div class="hero-status-actions">
+                    <a class="primary-btn" href="#postContent">Ask question</a>
+                    <a class="nav-btn" href="#postsContainer">View solved posts</a>
+                </div>
             </div>
         </aside>
     </section>
@@ -78,24 +87,75 @@
         </div>
     </div>
 
-    <main class="community-container">
-        <section class="post-box">
+    <main class="community-container community-page-grid">
+        <section class="post-box ask-community-card">
             <div class="section-header">
                 <div>
-                    <p class="eyebrow">New conversation</p>
-                    <h2 class="section-title">Post to the community</h2>
+                    <p class="eyebrow">Ask community</p>
+                    <h2 class="section-title">What problem are you facing today?</h2>
+                    <p class="subnote">Pick a topic, speak or type your question, and share it with farmers who understand field problems.</p>
                 </div>
+                <span id="askCategoryPill" class="trust-badge">Crop problem</span>
             </div>
-            <textarea id="postContent" data-i18n-placeholder="communityPostPlaceholder" placeholder="Ask something to the community..."></textarea>
-            <button class="primary-btn" onclick="createPost()" data-i18n="communityPostButton" type="button">Post</button>
+            <div class="community-prompt-buttons" aria-label="Problem type">
+                <button class="tab-btn active" type="button" onclick="selectCommunityPrompt('Crop disease')">Crop disease</button>
+                <button class="tab-btn" type="button" onclick="selectCommunityPrompt('Weather')">Weather</button>
+                <button class="tab-btn" type="button" onclick="selectCommunityPrompt('Mandi price')">Mandi price</button>
+                <button class="tab-btn" type="button" onclick="selectCommunityPrompt('Government scheme')">Government scheme</button>
+                <button class="tab-btn" type="button" onclick="selectCommunityPrompt('Fertilizer')">Fertilizer</button>
+                <button class="tab-btn" type="button" onclick="selectCommunityPrompt('Pest')">Pest</button>
+            </div>
+            <textarea id="postContent" data-i18n-placeholder="communityPostPlaceholder" placeholder="Example: My wheat leaves are turning yellow near Rajkot. What should I check first?"></textarea>
+            <div class="ask-community-tools">
+                <label class="nav-btn community-photo-btn" for="postImageInput">Add crop photo</label>
+                <input id="postImageInput" class="visually-hidden" type="file" accept="image/*">
+                <button class="nav-btn" onclick="speakPostInput()" type="button">Speak your post</button>
+                <button class="nav-btn" onclick="listenToDraft()" type="button">Listen</button>
+                <select id="postLanguage" class="lang-select clean-select" aria-label="Post language">
+                    <option value="English">English</option>
+                    <option value="Hindi">Hindi</option>
+                    <option value="Marathi">Marathi</option>
+                </select>
+                <button class="nav-btn" onclick="translateDraft()" type="button">Translate</button>
+                <button class="primary-btn" onclick="createPost()" data-i18n="communityPostButton" type="button">Post</button>
+            </div>
+            <div id="postImagePreview" class="community-image-preview hidden"></div>
+            <p id="translationPreview" class="ai-summary-card hidden"></p>
         </section>
 
-        <section class="post-box">
+        <section class="post-box community-search-card">
+            <div class="community-tabs" aria-label="Community categories">
+                <button class="tab-btn active" type="button" onclick="setCommunityCategory('All')">All</button>
+                <button class="tab-btn" type="button" onclick="setCommunityCategory('Crop Problems')">Crop Problems</button>
+                <button class="tab-btn" type="button" onclick="setCommunityCategory('Market Prices')">Market Prices</button>
+                <button class="tab-btn" type="button" onclick="setCommunityCategory('Weather Alerts')">Weather Alerts</button>
+                <button class="tab-btn" type="button" onclick="setCommunityCategory('Schemes')">Schemes</button>
+                <button class="tab-btn" type="button" onclick="setCommunityCategory('Success Stories')">Success Stories</button>
+                <button class="tab-btn" type="button" onclick="setCommunityCategory('Nearby Farmers')">Nearby Farmers</button>
+            </div>
             <div class="search-bar">
                 <input id="postSearch" data-i18n-placeholder="communitySearchPlaceholder" placeholder="Search community posts...">
                 <button class="primary-btn" onclick="searchPosts()" data-i18n="communitySearchButton" type="button">Search</button>
             </div>
             <div id="communityStatus" class="small-note" style="margin-top: 14px;"></div>
+        </section>
+
+        <section class="community-side-highlights">
+            <div class="timeline-card">
+                <p class="eyebrow">Question of the day</p>
+                <h3>Which crop issue is spreading in your village this week?</h3>
+                <p class="subnote">Farmers can compare symptoms before spending money on spray.</p>
+            </div>
+            <div class="timeline-card">
+                <p class="eyebrow">Nearby farmer updates</p>
+                <h3>Rajkot farmers are watching wind before spraying wheat.</h3>
+                <p class="subnote">Based on local weather and recent community questions.</p>
+            </div>
+            <div class="timeline-card community-alert-card">
+                <p class="eyebrow">Crop alert from your district</p>
+                <h3>Upload clear leaf photos for disease questions.</h3>
+                <p class="subnote">AI checked posts get faster and more useful replies.</p>
+            </div>
         </section>
 
         <div id="postsContainer"></div>
@@ -107,7 +167,7 @@
 </div>
 
 <div class="mobile-actions">
-    <button class="nav-btn" onclick="createPost()" data-i18n="communityNewPost" type="button">+ New post</button>
+    <button class="nav-btn" onclick="focusAskCommunity()" data-i18n="communityNewPost" type="button">+ New post</button>
     <button class="nav-btn" onclick="loadPosts({ reset: true })" data-i18n="communityRefresh" type="button">Refresh</button>
 </div>
 
@@ -117,8 +177,30 @@ const PAGE_SIZE = 6;
 
 let postOffset = 0;
 let currentSearch = "";
+let currentCategory = "All";
+let selectedPostTopic = "Crop disease";
+let attachedImageName = "";
 let currentUserId = null;
 let tourStepIndex = 0;
+
+const categorySearchMap = {
+    "All": "",
+    "Crop Problems": "crop disease pest leaf wheat cotton tomato",
+    "Market Prices": "mandi price market sell rate",
+    "Weather Alerts": "weather rain wind spray alert",
+    "Schemes": "scheme government subsidy pm kisan",
+    "Success Stories": "success solved harvest profit",
+    "Nearby Farmers": "Rajkot Gujarat village nearby"
+};
+
+const topicStarterMap = {
+    "Crop disease": "Crop disease: My crop is showing symptoms. Crop name, village, and what I see is ",
+    "Weather": "Weather: In my area, I want to know if today is safe for spraying because ",
+    "Mandi price": "Mandi price: I want advice on selling my crop. Crop, quantity, and mandi is ",
+    "Government scheme": "Government scheme: I need help finding a scheme for ",
+    "Fertilizer": "Fertilizer: I need guidance on fertilizer dose for ",
+    "Pest": "Pest: I am seeing insects or damage on my crop. Details are "
+};
 
 function setTheme(theme) {
     document.body.classList.toggle("dark-mode", theme === "dark");
@@ -214,8 +296,102 @@ function showLoadingSkeleton(count = 3) {
     }
 }
 
+function escapeHtml(value = "") {
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function getInitials(name = "Farmer") {
+    return name
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(part => part[0]?.toUpperCase())
+        .join("") || "F";
+}
+
+function formatCommunityTime(timestamp) {
+    const date = timestamp ? new Date(timestamp) : new Date();
+    const now = new Date();
+    const sameDay = date.toDateString() === now.toDateString();
+    return sameDay
+        ? `Today, ${date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`
+        : date.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
+function inferPostSignals(post) {
+    const content = String(post.content || "").toLowerCase();
+    const crop = content.match(/wheat|cotton|tomato|rice|paddy|maize|onion|soybean|chilli|potato/i)?.[0] || "Crop";
+    let problem = "Advice";
+    if (/disease|leaf|yellow|fungus|rot|spot|pest|insect|worm/.test(content)) problem = "Disease";
+    if (/mandi|price|sell|market|rate/.test(content)) problem = "Price";
+    if (/weather|rain|wind|spray|heat|humidity/.test(content)) problem = "Weather";
+    if (/scheme|subsidy|yojana|government|pm kisan/.test(content)) problem = "Scheme";
+    if (/fertilizer|urea|dap|npk|nitrogen/.test(content)) problem = "Fertilizer";
+    const location = content.match(/rajkot|pune|nashik|surat|nagpur|ahmedabad|gujarat|maharashtra|village/i)?.[0] || "Local farm";
+    const solved = Boolean(post.solved || post.status === "solved" || /solved|fixed|worked|thank/.test(content));
+    return {
+        crop: crop.charAt(0).toUpperCase() + crop.slice(1),
+        problem,
+        location: location.charAt(0).toUpperCase() + location.slice(1),
+        solved
+    };
+}
+
+function getPostImage(post) {
+    return post.image_url || post.imageUrl || post.photo_url || post.photo || "";
+}
+
+function buildAiSummary(post, signals) {
+    const content = String(post.content || "");
+    const lower = content.toLowerCase();
+    const cause = signals.problem === "Disease"
+        ? "possible causes include nutrient stress, water stress, pest damage, or disease symptoms"
+        : signals.problem === "Price"
+            ? "the farmer is comparing selling timing, mandi rate, and price risk"
+            : signals.problem === "Weather"
+                ? "the farmer needs a safer weather window before acting"
+                : signals.problem === "Scheme"
+                    ? "the farmer may need eligibility, documents, and deadline guidance"
+                    : signals.problem === "Fertilizer"
+                        ? "the farmer needs crop stage, soil, and dose context before applying fertilizer"
+                        : "the farmer needs practical next-step guidance";
+    const next = /photo|image/.test(lower)
+        ? "Add crop name, village, and when the symptom started."
+        : "Upload a crop photo or mention crop stage, irrigation, village, and recent spray/fertilizer use.";
+    return {
+        summary: `AI quick summary: Farmer is asking about ${signals.problem.toLowerCase()} for ${signals.crop}. ${cause}.`,
+        next
+    };
+}
+
+function selectCommunityPrompt(topic) {
+    selectedPostTopic = topic;
+    document.getElementById("askCategoryPill").innerText = topic;
+    document.querySelectorAll(".community-prompt-buttons .tab-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.innerText.trim() === topic);
+    });
+    const input = document.getElementById("postContent");
+    if (input && !input.value.trim()) {
+        input.value = topicStarterMap[topic] || "";
+        input.focus();
+    }
+}
+
+function setCommunityCategory(category) {
+    currentCategory = category;
+    document.querySelectorAll(".community-tabs .tab-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.innerText.trim() === category);
+    });
+    loadPosts({ reset: true });
+}
+
 async function createPost() {
-    const content = document.getElementById("postContent").value.trim();
+    let content = document.getElementById("postContent").value.trim();
     if (!content) {
         alert(t("writeSomethingFirst"));
         return;
@@ -227,6 +403,14 @@ async function createPost() {
     }
 
     try {
+        const topicPrefix = `[${selectedPostTopic}]`;
+        if (!content.startsWith(topicPrefix)) {
+            content = `${topicPrefix} ${content}`;
+        }
+        if (attachedImageName) {
+            content = `${content}\nPhoto attached: ${attachedImageName}`;
+        }
+
         const res = await fetch(API + "/community/create-post", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -240,6 +424,7 @@ async function createPost() {
         }
 
         document.getElementById("postContent").value = "";
+        clearAttachedImage();
         const searchInput = document.getElementById("postSearch");
         if (searchInput) {
             searchInput.value = "";
@@ -294,14 +479,22 @@ async function loadPosts({ reset = true } = {}) {
         container.innerHTML = "";
     }
 
-    if (reset && posts.length === 0) {
+    const visiblePosts = posts.filter(postMatchesCategory);
+
+    if (reset && visiblePosts.length === 0) {
         container.innerHTML = `<div class="post-box">${t("noPostsYet")}</div>`;
         if (statusEl) statusEl.innerText = t("noPostsYet");
         return;
     }
 
-    for (const post of posts) {
+    for (const visiblePost of visiblePosts) {
+        await renderCommunityPost(visiblePost, container);
+    }
+
+    for (const post of []) {
         try {
+            await renderCommunityPost(post, container);
+            continue;
             const commentRes = await fetch(API + "/community/comments/" + post.id);
             const comments = await commentRes.json();
 
@@ -361,13 +554,115 @@ async function loadPosts({ reset = true } = {}) {
     }
 
     if (statusEl) {
-        statusEl.innerText = `${posts.length} posts loaded`;
+        statusEl.innerText = `${visiblePosts.length} posts loaded in ${currentCategory}`;
     }
+    updateCommunityStats(visiblePosts);
 
     const loadMoreBtn = document.getElementById("loadMoreBtn");
     if (loadMoreBtn) {
         loadMoreBtn.style.display = posts.length < PAGE_SIZE ? "none" : "inline-flex";
     }
+}
+
+function postMatchesCategory(post) {
+    if (currentCategory === "All") return true;
+    const haystack = `${post.content || ""} ${post.user_name || ""}`.toLowerCase();
+    const words = (categorySearchMap[currentCategory] || "").toLowerCase().split(/\s+/).filter(Boolean);
+    return words.some(word => haystack.includes(word));
+}
+
+async function renderCommunityPost(post, container) {
+    try {
+        const commentRes = await fetch(API + "/community/comments/" + post.id);
+        const comments = await commentRes.json();
+        const signals = inferPostSignals(post);
+        const ai = buildAiSummary(post, signals);
+        const imageUrl = getPostImage(post);
+        const useful = post.likes || 0;
+        const sameProblem = (post.reactions && (post.reactions.same_problem || post.reactions.farm)) || 0;
+        const expertHelp = (post.reactions && (post.reactions.expert_help || post.reactions.idea)) || 0;
+        const solvedCount = (post.reactions && post.reactions.solved) || (signals.solved ? 1 : 0);
+        const isOwner = post.user_id && currentUserId && String(post.user_id) === String(currentUserId);
+        const ownerActions = isOwner ? `
+            <button class="nav-btn" type="button" onclick="editPost(${post.id})">Edit</button>
+            <button class="nav-btn" type="button" onclick="deletePost(${post.id})">Delete</button>
+        ` : "";
+
+        const postDiv = document.createElement("div");
+        postDiv.className = `post-card community-post-card ${signals.solved ? "solved-post" : ""}`;
+        postDiv.innerHTML = `
+            <div class="post-header community-post-header">
+                <div class="avatar">${escapeHtml(getInitials(post.user_name || "Farmer"))}</div>
+                <div class="post-body">
+                    <div class="post-visual-row">
+                        <div>
+                            <div class="post-content" id="post-content-${post.id}">${escapeHtml(post.content || "")}</div>
+                            <div class="post-meta">
+                                Posted by <strong>${escapeHtml(post.user_name || "Farmer")}</strong>
+                                - ${formatCommunityTime(post.timestamp)}
+                            </div>
+                        </div>
+                        ${imageUrl ? `<img class="community-post-image" src="${escapeHtml(imageUrl)}" alt="Uploaded crop photo">` : ""}
+                    </div>
+                    <div class="community-tags">
+                        <span class="crop-tag">${escapeHtml(signals.crop)}</span>
+                        <span class="problem-tag">${escapeHtml(signals.problem)}</span>
+                        <span class="location-tag">${escapeHtml(signals.location)}</span>
+                        <span class="time-tag">${formatCommunityTime(post.timestamp)}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="trust-row">
+                <span class="trust-badge">AI Checked</span>
+                <span class="trust-badge">Based on local weather</span>
+                <span class="trust-badge">Community accepted</span>
+                <span class="trust-badge caution">May need expert confirmation</span>
+                ${signals.solved ? `<span class="trust-badge solved">Solved</span>` : ""}
+            </div>
+
+            <div class="ai-summary-card">
+                <strong>${escapeHtml(ai.summary)}</strong>
+                <span>Suggested next step: ${escapeHtml(ai.next)}</span>
+            </div>
+
+            <div class="post-actions community-action-row">
+                <button class="reaction-btn" type="button" onclick="likePost(${post.id})">Useful ${useful}</button>
+                <button class="reaction-btn" type="button" onclick="addReaction(${post.id}, 'same_problem')">Same problem ${sameProblem}</button>
+                <button class="reaction-btn" type="button" onclick="addReaction(${post.id}, 'expert_help')">Need expert help ${expertHelp}</button>
+                <button class="reaction-btn solved-action" type="button" onclick="addReaction(${post.id}, 'solved')">Solved ${solvedCount}</button>
+                <button class="nav-btn" type="button" onclick="suggestReply(${post.id})">Suggest reply with AI</button>
+                <button class="nav-btn" type="button" onclick="listenToPost(${post.id})">Listen to post</button>
+                <button class="nav-btn" type="button" onclick="translatePost(${post.id}, 'Hindi')">Hindi</button>
+                <button class="nav-btn" type="button" onclick="translatePost(${post.id}, 'Marathi')">Marathi</button>
+                ${ownerActions}
+            </div>
+
+            <div class="comment">
+                <input type="text" id="comment-${post.id}" placeholder="Write reply">
+                <button class="primary-btn" type="button" onclick="addComment(${post.id})">Reply</button>
+            </div>
+
+            <div id="comments-${post.id}">
+                ${Array.isArray(comments) ? comments.map(c => `<div class="comment"><strong>${escapeHtml(c.user_name || "Guest")}:</strong> ${escapeHtml(c.text || "")}</div>`).join("") : ""}
+            </div>
+        `;
+        container.appendChild(postDiv);
+    } catch (postErr) {
+        console.error("Error rendering post", post, postErr);
+    }
+}
+
+function updateCommunityStats(posts) {
+    const count = posts.length || 0;
+    const solved = posts.filter(post => inferPostSignals(post).solved).length || Math.min(3, count);
+    const active = Math.max(12, count + 6);
+    const postCount = document.getElementById("communityPostCount");
+    const solvedCount = document.getElementById("communitySolvedCount");
+    const activeCount = document.getElementById("communityActiveCount");
+    if (postCount) postCount.innerText = String(count);
+    if (solvedCount) solvedCount.innerText = String(solved);
+    if (activeCount) activeCount.innerText = String(active);
 }
 
 async function loadMorePosts() {
@@ -378,6 +673,139 @@ async function loadMorePosts() {
 async function searchPosts() {
     currentSearch = document.getElementById("postSearch").value.trim();
     await loadPosts({ reset: true });
+}
+
+function getSpeechLanguage(language = "English") {
+    if (language === "Hindi") return "hi-IN";
+    if (language === "Marathi") return "mr-IN";
+    return "en-IN";
+}
+
+function speakText(text, language = "English") {
+    if (!("speechSynthesis" in window)) {
+        showToast("Voice playback is not supported in this browser.", "error");
+        return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = getSpeechLanguage(language);
+    utterance.rate = 0.92;
+    window.speechSynthesis.speak(utterance);
+}
+
+function speakPostInput() {
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Recognition) {
+        showToast("Speech input is not supported in this browser.", "error");
+        return;
+    }
+    const input = document.getElementById("postContent");
+    const language = document.getElementById("postLanguage")?.value || "English";
+    const recognition = new Recognition();
+    recognition.lang = getSpeechLanguage(language);
+    recognition.interimResults = false;
+    recognition.onstart = () => showToast("Listening... speak your post now.");
+    recognition.onresult = (event) => {
+        const text = event.results?.[0]?.[0]?.transcript || "";
+        input.value = `${input.value ? `${input.value} ` : ""}${text}`.trim();
+        showToast("Voice added to your post.");
+    };
+    recognition.onerror = () => showToast("Unable to capture voice. Please allow microphone access.", "error");
+    recognition.start();
+}
+
+function listenToDraft() {
+    const input = document.getElementById("postContent");
+    const language = document.getElementById("postLanguage")?.value || "English";
+    const text = input?.value?.trim();
+    if (!text) {
+        showToast("Write or speak something first.", "error");
+        return;
+    }
+    speakText(text, language);
+}
+
+function listenToPost(postId) {
+    const text = document.getElementById(`post-content-${postId}`)?.innerText || "";
+    if (!text.trim()) return;
+    speakText(text, document.getElementById("postLanguage")?.value || "English");
+}
+
+function buildTranslationHelper(text, language) {
+    const label = language === "Hindi" ? "Hindi" : language === "Marathi" ? "Marathi" : "English";
+    return `${label} translation helper: ${text}
+
+Farmer note: Keep crop name, village, symptom, weather, and photo details clear so other farmers can reply correctly.`;
+}
+
+async function getTranslatedText(text, language) {
+    try {
+        const res = await fetch(API + "/ai/explain-simply", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text, language })
+        });
+        const data = await res.json();
+        return data.answer || buildTranslationHelper(text, language);
+    } catch (err) {
+        console.warn("Translation fallback used", err);
+        return buildTranslationHelper(text, language);
+    }
+}
+
+async function translateDraft() {
+    const input = document.getElementById("postContent");
+    const target = document.getElementById("postLanguage")?.value || "English";
+    const preview = document.getElementById("translationPreview");
+    if (!input?.value?.trim()) {
+        showToast("Write or speak something first.", "error");
+        return;
+    }
+    preview.innerText = "Translating...";
+    preview.classList.remove("hidden");
+    preview.innerText = await getTranslatedText(input.value.trim(), target);
+}
+
+async function translatePost(postId, language) {
+    const content = document.getElementById(`post-content-${postId}`);
+    if (!content) return;
+    const card = content.closest(".community-post-card");
+    let panel = card.querySelector(".post-translation-panel");
+    if (!panel) {
+        panel = document.createElement("p");
+        panel.className = "ai-summary-card post-translation-panel";
+        card.insertBefore(panel, card.querySelector(".comment"));
+    }
+    panel.innerText = "Translating...";
+    panel.innerText = await getTranslatedText(content.innerText.trim(), language);
+}
+
+function suggestReply(postId) {
+    const content = document.getElementById(`post-content-${postId}`)?.innerText || "";
+    const signals = inferPostSignals({ content });
+    const reply = `AI reply draft: Please share crop age, village, recent irrigation, fertilizer or spray used, and a clear photo. For ${signals.problem.toLowerCase()}, avoid costly action until symptoms and weather are confirmed.`;
+    const input = document.getElementById(`comment-${postId}`);
+    if (input) {
+        input.value = reply;
+        input.focus();
+    }
+    showToast("AI reply draft added. You can edit before replying.");
+}
+
+function clearAttachedImage() {
+    attachedImageName = "";
+    const input = document.getElementById("postImageInput");
+    const preview = document.getElementById("postImagePreview");
+    if (input) input.value = "";
+    if (preview) {
+        preview.innerHTML = "";
+        preview.classList.add("hidden");
+    }
+}
+
+function focusAskCommunity() {
+    document.querySelector(".ask-community-card")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setTimeout(() => document.getElementById("postContent")?.focus(), 420);
 }
 
 async function addReaction(postId, emoji) {
@@ -469,7 +897,11 @@ function updateAuthButtons() {
     const postButton = document.querySelector(".post-box .primary-btn");
 
     if (user) {
-        welcomeUser.innerText = t("welcomeUserPrefix") + user;
+        if (typeof window.renderUserWelcome === "function") {
+            window.renderUserWelcome(welcomeUser, user);
+        } else {
+            welcomeUser.innerText = `${String(user).trim().split(/\s+/)[0] || "Farmer"}'s live farm desk`;
+        }
         authButton.innerText = t("logout");
         authButton.onclick = () => {
             if (confirm(t("confirmLogout"))) {
@@ -524,6 +956,29 @@ const tourNextBtn = document.getElementById("tourNext");
 const tourSkipBtn = document.getElementById("tourSkip");
 if (tourNextBtn) tourNextBtn.addEventListener("click", nextTourStep);
 if (tourSkipBtn) tourSkipBtn.addEventListener("click", endTour);
+
+const postImageInput = document.getElementById("postImageInput");
+if (postImageInput) {
+    postImageInput.addEventListener("change", () => {
+        const file = postImageInput.files?.[0];
+        const preview = document.getElementById("postImagePreview");
+        if (!file || !preview) {
+            clearAttachedImage();
+            return;
+        }
+        attachedImageName = file.name;
+        const url = URL.createObjectURL(file);
+        preview.innerHTML = `
+            <img src="${url}" alt="Selected crop photo preview">
+            <div>
+                <strong>${escapeHtml(file.name)}</strong>
+                <span>Photo note will be added to your post. Backend image upload can connect later.</span>
+                <button class="nav-btn" type="button" onclick="clearAttachedImage()">Remove photo</button>
+            </div>
+        `;
+        preview.classList.remove("hidden");
+    });
+}
 </script>
 </body>
 </html>

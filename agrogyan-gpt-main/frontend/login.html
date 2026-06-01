@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - AgroGyanGPT</title>
   <link rel="stylesheet" href="style.css">
-  <script defer src="ui.js"></script>
-  <script defer src="api-config.js"></script>
+  <script defer src="ui.js?v=20260501-fastlogin"></script>
+  <script defer src="api-config.js?v=20260501-fastlogin"></script>
 </head>
 <body class="login-page">
 <div id="loginIntro" class="login-intro" aria-hidden="true">
@@ -94,89 +94,116 @@
 </div>
 
 <div id="registerModal" class="modal-overlay hidden">
-    <div class="modal-card">
-        <h2 class="panel-title" data-i18n="registerTitle">Create an account</h2>
-        <div class="form-grid">
+    <div class="modal-card register-modal-card">
+        <div class="register-flow-header">
             <div>
-                <label class="visually-hidden" for="regName">Full name</label>
-                <input id="regName" type="text" data-i18n-placeholder="fullNamePlaceholder" placeholder="Full name" autocomplete="name">
+                <h2 class="panel-title" data-i18n="registerTitle">Create an account</h2>
+                <p class="register-flow-subtitle">Complete your details first, then verify the OTP on the next step.</p>
             </div>
-            <div>
-                <label class="visually-hidden" for="regEmail">Email address</label>
-                <input id="regEmail" type="email" data-i18n-placeholder="emailPlaceholder" placeholder="Email address" autocomplete="email">
-            </div>
-            <div>
-                <label class="visually-hidden" for="regMobile">Mobile number</label>
-                <input id="regMobile" type="tel" data-i18n-placeholder="mobileNumber" placeholder="Mobile number" autocomplete="tel" maxlength="10">
-            </div>
-            <div>
-                <label class="visually-hidden" for="regDob">Date of birth</label>
-                <input id="regDob" type="date" max="2026-12-31" autocomplete="bday">
-            </div>
-            <div>
-                <label class="visually-hidden" for="regState">State</label>
-                <select id="regState" aria-label="State">
-                    <option value="" data-i18n="selectState">Select state</option>
-                </select>
-            </div>
-            <div>
-                <label class="visually-hidden" for="regDistrict">District or city</label>
-                <select id="regDistrict" aria-label="District or city" disabled>
-                    <option value="" data-i18n="selectDistrictCity">Select district / city</option>
-                </select>
-            </div>
-            <div>
-                <label class="visually-hidden" for="regRole">Role</label>
-                <select id="regRole" aria-label="Role">
-                    <option value="farmer" data-i18n="farmer">Farmer</option>
-                    <option value="advisor" data-i18n="agriAdvisor">Agri advisor</option>
-                    <option value="buyer" data-i18n="mandiBuyer">Mandi buyer</option>
-                </select>
-            </div>
-            <div>
-                <label class="visually-hidden" for="regPreferredLanguage">Preferred language</label>
-                <select id="regPreferredLanguage" aria-label="Preferred language">
-                    <option value="English">English</option>
-                    <option value="Hindi">Hindi</option>
-                    <option value="Marathi">Marathi</option>
-                </select>
-            </div>
-            <div>
-                <label class="visually-hidden" for="regOtpChannel">OTP channel</label>
-                <select id="regOtpChannel" aria-label="OTP channel">
-                    <option value="sms" data-i18n="smsOtp">SMS OTP</option>
-                    <option value="whatsapp" data-i18n="whatsappOtp">WhatsApp OTP</option>
-                </select>
-            </div>
-            <div>
-                <label class="visually-hidden" for="regOtp">OTP</label>
-                <input id="regOtp" type="text" data-i18n-placeholder="enterOtp" placeholder="Enter 6-digit OTP" inputmode="numeric" maxlength="6">
+            <div class="register-step-indicator" aria-label="Registration progress">
+                <span id="stepPillDetails" class="register-step-pill active">1. Details</span>
+                <span id="stepPillOtp" class="register-step-pill">2. Verify OTP</span>
             </div>
         </div>
-        <label class="visually-hidden" for="regPassword">Password</label>
-        <input id="regPassword" type="password" data-i18n-placeholder="passwordPlaceholder" placeholder="Password (min 6 chars)" autocomplete="new-password">
-        <div class="form-grid">
-            <button id="sendOtpButton" class="login-btn-green" onclick="sendRegistrationOtp()" type="button">
-                <span class="btn-text" data-i18n="sendOtp">Send OTP</span>
-                <span class="btn-spinner hidden" aria-hidden="true"></span>
-            </button>
-            <button id="registerButton" class="login-btn-green" onclick="registerUser()" type="button">
-                <span class="btn-text" data-i18n="verifyOtpRegister">Verify OTP & Register</span>
-                <span class="btn-spinner hidden" aria-hidden="true"></span>
-            </button>
+
+        <div id="registerStepDetails" class="register-step-panel">
+            <div class="form-grid register-form-grid">
+                <div>
+                    <label class="visually-hidden" for="regName">Full name</label>
+                    <input id="regName" type="text" data-i18n-placeholder="fullNamePlaceholder" placeholder="Full name" autocomplete="name">
+                </div>
+                <div>
+                    <label class="visually-hidden" for="regEmail">Email address</label>
+                    <input id="regEmail" type="email" data-i18n-placeholder="emailPlaceholder" placeholder="Email address" autocomplete="email">
+                </div>
+                <div>
+                    <label class="visually-hidden" for="regMobile">Mobile number</label>
+                    <input id="regMobile" type="tel" data-i18n-placeholder="mobileNumber" placeholder="Mobile number" autocomplete="tel" maxlength="10">
+                </div>
+                <div>
+                    <label class="visually-hidden" for="regDob">Date of birth</label>
+                    <input id="regDob" type="date" max="2026-12-31" autocomplete="bday">
+                </div>
+                <div>
+                    <label class="visually-hidden" for="regState">State</label>
+                    <select id="regState" aria-label="State">
+                        <option value="" data-i18n="selectState">Select state</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="visually-hidden" for="regDistrict">District or city</label>
+                    <select id="regDistrict" aria-label="District or city" disabled>
+                        <option value="" data-i18n="selectDistrictCity">Select district / city</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="visually-hidden" for="regRole">Role</label>
+                    <select id="regRole" aria-label="Role">
+                        <option value="farmer" data-i18n="farmer">Farmer</option>
+                        <option value="advisor" data-i18n="agriAdvisor">Agri advisor</option>
+                        <option value="buyer" data-i18n="mandiBuyer">Mandi buyer</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="visually-hidden" for="regPreferredLanguage">Preferred language</label>
+                    <select id="regPreferredLanguage" aria-label="Preferred language">
+                        <option value="English">English</option>
+                        <option value="Hindi">Hindi</option>
+                        <option value="Marathi">Marathi</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="visually-hidden" for="regOtpChannel">OTP channel</label>
+                    <select id="regOtpChannel" aria-label="OTP channel">
+                        <option value="sms" data-i18n="smsOtp">SMS OTP</option>
+                        <option value="whatsapp" data-i18n="whatsappOtp">WhatsApp OTP</option>
+                        <option value="manual">Temporary code fallback</option>
+                    </select>
+                </div>
+                <div class="register-password-field">
+                    <label class="visually-hidden" for="regPassword">Password</label>
+                    <input id="regPassword" type="password" data-i18n-placeholder="passwordPlaceholder" placeholder="Password (min 6 chars)" autocomplete="new-password">
+                </div>
+            </div>
+            <div class="register-step-actions">
+                <button id="sendOtpButton" class="login-btn-green" onclick="sendRegistrationOtp()" type="button">
+                    <span class="btn-text" data-i18n="sendOtp">Send OTP</span>
+                    <span class="btn-spinner hidden" aria-hidden="true"></span>
+                </button>
+            </div>
+            <p class="small-note">Choose SMS or WhatsApp if available. If phone OTP is not working, use the temporary code fallback for now and finish phone verification later.</p>
         </div>
-        <p class="small-note" data-i18n="otpFlowNote">Choose SMS or WhatsApp, receive OTP on your phone, then verify to create the account.</p>
-        <button id="resendOtpButton" class="nav-btn" onclick="sendRegistrationOtp(true)" type="button" data-i18n="resendOtp">Resend OTP</button>
+
+        <div id="registerStepOtp" class="register-step-panel hidden">
+            <div class="register-review-card">
+                <p class="register-review-label">Verify the code sent to your selected channel.</p>
+                <p id="registerReviewSummary" class="register-review-summary">Your registration details will appear here before OTP verification.</p>
+            </div>
+            <div class="form-grid register-otp-grid">
+                <div>
+                    <label class="visually-hidden" for="regOtp">OTP</label>
+                    <input id="regOtp" type="text" data-i18n-placeholder="enterOtp" placeholder="Enter 6-digit OTP" inputmode="numeric" maxlength="6">
+                </div>
+            </div>
+            <div class="register-step-actions register-step-actions-split">
+                <button id="backToDetailsButton" class="nav-btn" onclick="goToRegisterStep('details')" type="button">Back to details</button>
+                <button id="resendOtpButton" class="nav-btn" onclick="sendRegistrationOtp(true)" type="button" data-i18n="resendOtp">Resend OTP</button>
+                <button id="registerButton" class="login-btn-green" onclick="registerUser()" type="button">
+                    <span class="btn-text" data-i18n="verifyOtpRegister">Verify OTP & Register</span>
+                    <span class="btn-spinner hidden" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
         <p class="login-switch">
             <span data-i18n="hasAccountPrompt">Already have an account?</span>
-            <a href="#" class="register-link" onclick="hideRegisterModal(); return false;" data-i18n="backToLogin">Back to login</a>
+            <a href="#" class="register-link" onclick="clearRegisterForm(); hideRegisterModal(); return false;" data-i18n="backToLogin">Back to login</a>
         </p>
         <p id="registerMessage" role="alert" aria-live="polite"></p>
     </div>
 </div>
 
-<script defer src="i18n.js"></script>
-<script src="auth.js"></script>
+<script defer src="i18n.js?v=20260501-fastlogin"></script>
+<script src="auth.js?v=20260501-fastlogin"></script>
 <script>
     if (typeof initI18n === "function") {
         initI18n();
